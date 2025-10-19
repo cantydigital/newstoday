@@ -7,12 +7,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import RichTextEditor from "@/components/ui/rich-text-editor"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import ImageUpload from "@/components/ui/image-upload"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog"
 import { updatePressRelease } from "@/lib/press-releases"
 import type { PressRelease, PressReleaseFormData } from "@/types/press-release"
+import { Edit } from "lucide-react"
 
 const categories = [
   "Business",
@@ -28,15 +36,16 @@ const categories = [
   "Other",
 ]
 
-interface EditPressReleaseFormProps {
+interface EditPressReleaseDialogProps {
   pressRelease: PressRelease
   onSuccess: () => void
-  onCancel: () => void
+  children?: React.ReactNode
 }
 
-export default function EditPressReleaseForm({ pressRelease, onSuccess, onCancel }: EditPressReleaseFormProps) {
+export default function EditPressReleaseDialog({ pressRelease, onSuccess, children }: EditPressReleaseDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [open, setOpen] = useState(false)
 
   const [formData, setFormData] = useState<PressReleaseFormData>({
     title: "",
@@ -74,6 +83,7 @@ export default function EditPressReleaseForm({ pressRelease, onSuccess, onCancel
 
     try {
       await updatePressRelease(pressRelease.id, formData)
+      setOpen(false)
       onSuccess()
     } catch (err) {
       setError("Failed to update press release. Please try again.")
@@ -88,12 +98,20 @@ export default function EditPressReleaseForm({ pressRelease, onSuccess, onCancel
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Edit Press Release</CardTitle>
-        <CardDescription>Update the press release information</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {children || (
+          <Button variant="outline" size="sm">
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Press Release</DialogTitle>
+          <DialogDescription>Update the press release information</DialogDescription>
+        </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title">
@@ -239,12 +257,17 @@ export default function EditPressReleaseForm({ pressRelease, onSuccess, onCancel
             <Button type="submit" disabled={isLoading}>
               {isLoading ? "Updating..." : "Update Press Release"}
             </Button>
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setOpen(false)} 
+              disabled={isLoading}
+            >
               Cancel
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   )
 }

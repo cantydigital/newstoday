@@ -24,16 +24,16 @@ export default function AllPressReleasesPage() {
       <Header />
 
       {/* Hero Section */}
-      <section className="py-20 md:py-32 bg-muted/30">
+      <section className="py-12 md:py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="secondary" className="mb-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <Badge variant="secondary" className="mb-4">
               Press Releases
             </Badge>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold text-foreground mb-6 text-balance">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-foreground mb-4 text-balance">
               All Press Releases
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 text-pretty max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground mb-6 text-pretty max-w-2xl mx-auto leading-relaxed">
               Browse all published press releases from businesses, organizations, and agencies across Australia. Stay updated with the latest news and announcements.
             </p>
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">

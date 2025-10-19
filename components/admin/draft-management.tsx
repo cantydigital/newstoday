@@ -8,14 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from "@/components/ui/dialog"
+import Link from "next/link"
 import { getDraftPressReleases, approvePressRelease, rejectPressRelease } from "@/lib/press-releases"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
@@ -26,7 +19,7 @@ export default function DraftManagement() {
   const [isLoading, setIsLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
-  const [selectedDraft, setSelectedDraft] = useState<PressRelease | null>(null)
+  const [rejectingId, setRejectingId] = useState<string | null>(null)
 
   const loadDrafts = async () => {
     try {
@@ -60,12 +53,23 @@ export default function DraftManagement() {
     try {
       await rejectPressRelease(id, rejectionReason)
       setRejectionReason("")
+      setRejectingId(null)
       await loadDrafts() // Reload the list
     } catch (error) {
       console.error("Error rejecting press release:", error)
     } finally {
       setProcessingId(null)
     }
+  }
+
+  const startRejection = (id: string) => {
+    setRejectingId(id)
+    setRejectionReason("")
+  }
+
+  const cancelRejection = () => {
+    setRejectingId(null)
+    setRejectionReason("")
   }
 
   if (isLoading) {
@@ -138,65 +142,16 @@ export default function DraftManagement() {
               <p className="text-sm text-muted-foreground line-clamp-3">{draft.content}</p>
 
               <div className="flex items-center gap-2 pt-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setSelectedDraft(draft)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      Preview
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Press Release Preview</DialogTitle>
-                      <DialogDescription>Review the full submission before approval</DialogDescription>
-                    </DialogHeader>
-                    {selectedDraft && (
-                      <div className="space-y-4">
-                        <div>
-                          <Badge variant="outline" className="mb-2">{selectedDraft.category}</Badge>
-                          <h2 className="text-2xl font-bold">{selectedDraft.title}</h2>
-                          {selectedDraft.subtitle && (
-                            <p className="text-lg text-muted-foreground mt-1">{selectedDraft.subtitle}</p>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground border-b pb-4">
-                          <span>By {selectedDraft.author}</span>
-                          <span>•</span>
-                          <span>{selectedDraft.company}</span>
-                          <span>•</span>
-                          <span>{format(selectedDraft.createdAt, "MMMM dd, yyyy")}</span>
-                        </div>
-
-                        {selectedDraft.imageUrl && (
-                          <img 
-                            src={selectedDraft.imageUrl} 
-                            alt={selectedDraft.title}
-                            className="w-full h-64 object-cover rounded-lg"
-                          />
-                        )}
-
-                        <div className="prose max-w-none">
-                          <p className="whitespace-pre-wrap">{selectedDraft.content}</p>
-                        </div>
-
-                        <div className="border-t pt-4">
-                          <h4 className="font-semibold mb-2">Contact Information</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Email: {selectedDraft.contactEmail}
-                            {selectedDraft.contactPhone && (
-                              <span> • Phone: {selectedDraft.contactPhone}</span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  asChild
+                >
+                  <Link href={`/admin/preview/${draft.id}`}>
+                    <Eye className="h-4 w-4 mr-1" />
+                    Preview
+                  </Link>
+                </Button>
 
                 <Button
                   size="sm"
@@ -207,48 +162,49 @@ export default function DraftManagement() {
                   {processingId === draft.id ? "Approving..." : "Approve"}
                 </Button>
 
-                <Dialog>
-                  <DialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => startRejection(draft.id)}
+                  disabled={processingId === draft.id || rejectingId === draft.id}
+                >
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Reject
+                </Button>
+              </div>
+
+              {rejectingId === draft.id && (
+                <div className="mt-4 p-4 border rounded-lg bg-muted/50 space-y-3">
+                  <div>
+                    <Label htmlFor={`rejection-reason-${draft.id}`}>Rejection Reason</Label>
+                    <Textarea
+                      id={`rejection-reason-${draft.id}`}
+                      placeholder="Enter reason for rejection..."
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      rows={3}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={cancelRejection}
+                    >
+                      Cancel
+                    </Button>
                     <Button
                       variant="destructive"
                       size="sm"
-                      disabled={processingId === draft.id}
+                      onClick={() => handleReject(draft.id)}
+                      disabled={processingId === draft.id || !rejectionReason.trim()}
                     >
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Reject
+                      {processingId === draft.id ? "Rejecting..." : "Confirm Rejection"}
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Reject Submission</DialogTitle>
-                      <DialogDescription>
-                        Please provide a reason for rejecting this press release submission.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="rejection-reason">Rejection Reason</Label>
-                        <Textarea
-                          id="rejection-reason"
-                          placeholder="Enter reason for rejection..."
-                          value={rejectionReason}
-                          onChange={(e) => setRejectionReason(e.target.value)}
-                          rows={3}
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleReject(draft.id)}
-                          disabled={processingId === draft.id || !rejectionReason.trim()}
-                        >
-                          {processingId === draft.id ? "Rejecting..." : "Confirm Rejection"}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

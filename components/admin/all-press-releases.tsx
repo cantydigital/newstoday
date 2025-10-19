@@ -13,14 +13,13 @@ import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
 import { Search, Eye, Calendar, User, Building, Edit } from "lucide-react"
 import { truncateHtml } from "@/lib/html-utils"
-import EditPressReleaseForm from "./edit-press-release-form"
+import EditPressReleaseDialog from "./edit-press-release-form"
 
 export default function AllPressReleases() {
   const [releases, setReleases] = useState<PressRelease[]>([])
   const [filteredReleases, setFilteredReleases] = useState<PressRelease[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [editingRelease, setEditingRelease] = useState<PressRelease | null>(null)
 
   const loadReleases = async () => {
     try {
@@ -53,12 +52,7 @@ export default function AllPressReleases() {
   }, [searchQuery, releases])
 
   const handleEditSuccess = () => {
-    setEditingRelease(null)
     loadReleases() // Reload the releases to show updated data
-  }
-
-  const handleEditCancel = () => {
-    setEditingRelease(null)
   }
 
   if (isLoading) {
@@ -155,14 +149,15 @@ export default function AllPressReleases() {
                         View
                       </Link>
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setEditingRelease(release)}
+                    <EditPressReleaseDialog
+                      pressRelease={release}
+                      onSuccess={handleEditSuccess}
                     >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                    </EditPressReleaseDialog>
                   </div>
                 </div>
               ))}
@@ -171,13 +166,6 @@ export default function AllPressReleases() {
         </CardContent>
       </Card>
 
-      {editingRelease && (
-        <EditPressReleaseForm
-          pressRelease={editingRelease}
-          onSuccess={handleEditSuccess}
-          onCancel={handleEditCancel}
-        />
-      )}
     </div>
   )
 }

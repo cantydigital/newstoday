@@ -27,18 +27,17 @@ const ITEMS_PER_PAGE = 10
 
 const categories = [
   "All Categories",
-  "Business & Finance",
-  "Technology & Startups", 
+  "Business",
+  "Technology",
   "Health & Wellness",
   "Education",
-  "Real Estate & Construction",
-  "Travel & Lifestyle",
-  "Environment & Sustainability",
-  "Retail & E-commerce",
-  "Government & Public Sector",
-  "Automotive",
-  "Energy & Mining",
-  "Entertainment & Media"
+  "Finance",
+  "Real Estate",
+  "Entertainment",
+  "Sports",
+  "Environment",
+  "Politics",
+  "Other"
 ]
 
 export default function AllPressReleasesClient() {

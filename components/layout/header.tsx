@@ -53,7 +53,7 @@ export default function Header({
                 <Link href="/admin/login">Sign In</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/submit">Get Started</Link>
+                <Link href="/submit">Submit A Release</Link>
               </Button>
             </div>
           )
