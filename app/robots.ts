@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://newstoday.au' // Replace with your actual domain
+  const baseUrl = 'https://newstoday.com.au'
   
   return {
     rules: [

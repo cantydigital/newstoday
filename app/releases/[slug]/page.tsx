@@ -29,22 +29,60 @@ export async function generateMetadata({ params }: PressReleasePageProps): Promi
     }
   }
 
+  const description = release.subtitle || release.content.replace(/<[^>]*>/g, '').substring(0, 160)
+  
   return {
     title: `${release.title} - ${release.company} | News Today`,
-    description: release.subtitle || release.content.substring(0, 160),
+    description: description,
+    keywords: [
+      release.category.toLowerCase(),
+      release.company.toLowerCase(),
+      'press release',
+      'Australian news',
+      'business news',
+      release.author.toLowerCase()
+    ],
+    authors: [{ name: release.author }],
+    publisher: 'News Today',
     openGraph: {
       title: release.title,
-      description: release.subtitle || release.content.substring(0, 160),
-      images: release.imageUrl ? [release.imageUrl] : [],
+      description: description,
+      url: `https://newstoday.com.au/releases/${release.slug}`,
+      siteName: 'News Today',
+      images: release.imageUrl ? [
+        {
+          url: release.imageUrl,
+          width: 1200,
+          height: 630,
+          alt: release.title,
+        }
+      ] : [
+        {
+          url: '/og-press-release.jpg',
+          width: 1200,
+          height: 630,
+          alt: release.title,
+        }
+      ],
       type: "article",
       publishedTime: release.publishedAt?.toISOString(),
       authors: [release.author],
+      section: release.category,
+      locale: 'en_AU',
     },
     twitter: {
       card: "summary_large_image",
       title: release.title,
-      description: release.subtitle || release.content.substring(0, 160),
-      images: release.imageUrl ? [release.imageUrl] : [],
+      description: description,
+      images: release.imageUrl ? [release.imageUrl] : ['/og-press-release.jpg'],
+      creator: '@newstoday_au',
+    },
+    alternates: {
+      canonical: `https://newstoday.com.au/releases/${release.slug}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
     },
   }
 }

@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { getPressReleases } from '@/lib/press-releases'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://newstoday.au' // Replace with your actual domain
+  const baseUrl = 'https://newstoday.com.au'
   
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -26,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/pricing`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,

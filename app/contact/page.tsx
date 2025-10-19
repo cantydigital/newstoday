@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,6 +21,42 @@ import Link from "next/link"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import ContactForm from "@/components/contact/contact-form"
+
+export const metadata: Metadata = {
+  title: "Contact Us - Get in Touch with News Today",
+  description: "Have questions about our press release distribution service? Contact News Today for support, media inquiries, or to learn more about getting your news published across Australia.",
+  keywords: [
+    "contact news today",
+    "press release support",
+    "media inquiry Australia",
+    "press release help",
+    "news distribution contact",
+    "Australian media contact"
+  ],
+  openGraph: {
+    title: "Contact Us - Get in Touch with News Today",
+    description: "Have questions about our press release distribution service? Contact News Today for support, media inquiries, or to learn more about getting your news published across Australia.",
+    url: 'https://newstoday.com.au/contact',
+    type: 'website',
+    images: [
+      {
+        url: '/og-contact.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Contact News Today - Press Release Service',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Contact Us - Get in Touch with News Today",
+    description: "Have questions about our press release distribution service? Contact News Today for support, media inquiries, or to learn more about getting your news published across Australia.",
+    images: ['/og-contact.jpg'],
+  },
+  alternates: {
+    canonical: 'https://newstoday.com.au/contact',
+  },
+}
 
 const contactReasons = [
   {

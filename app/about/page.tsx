@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -23,6 +24,42 @@ import {
 import Link from "next/link"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
+
+export const metadata: Metadata = {
+  title: "About Us - News Today's Mission & Vision",
+  description: "Learn about News Today's mission to democratize media access for Australian businesses. Discover our story, values, and commitment to helping businesses get the media coverage they deserve.",
+  keywords: [
+    "about news today",
+    "press release company Australia",
+    "media distribution service",
+    "Australian press release service",
+    "business media coverage",
+    "news distribution company"
+  ],
+  openGraph: {
+    title: "About Us - News Today's Mission & Vision",
+    description: "Learn about News Today's mission to democratize media access for Australian businesses. Discover our story, values, and commitment to helping businesses get the media coverage they deserve.",
+    url: 'https://newstoday.com.au/about',
+    type: 'website',
+    images: [
+      {
+        url: '/og-about.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'About News Today - Press Release Service',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "About Us - News Today's Mission & Vision",
+    description: "Learn about News Today's mission to democratize media access for Australian businesses. Discover our story, values, and commitment to helping businesses get the media coverage they deserve.",
+    images: ['/og-about.jpg'],
+  },
+  alternates: {
+    canonical: 'https://newstoday.com.au/about',
+  },
+}
 
 const services = [
   {

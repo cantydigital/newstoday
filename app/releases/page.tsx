@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -17,6 +18,43 @@ import Link from "next/link"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import AllPressReleasesClient from "@/components/releases/all-press-releases-client"
+
+export const metadata: Metadata = {
+  title: "All Press Releases - Latest News from Australian Businesses",
+  description: "Browse all published press releases from businesses, organizations, and agencies across Australia. Stay updated with the latest news, announcements, and industry updates.",
+  keywords: [
+    "Australian press releases",
+    "business news Australia",
+    "company announcements",
+    "latest press releases",
+    "Australian business news",
+    "corporate news",
+    "industry updates Australia"
+  ],
+  openGraph: {
+    title: "All Press Releases - Latest News from Australian Businesses",
+    description: "Browse all published press releases from businesses, organizations, and agencies across Australia. Stay updated with the latest news, announcements, and industry updates.",
+    url: 'https://newstoday.com.au/releases',
+    type: 'website',
+    images: [
+      {
+        url: '/og-releases.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'News Today - All Press Releases',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "All Press Releases - Latest News from Australian Businesses",
+    description: "Browse all published press releases from businesses, organizations, and agencies across Australia. Stay updated with the latest news, announcements, and industry updates.",
+    images: ['/og-releases.jpg'],
+  },
+  alternates: {
+    canonical: 'https://newstoday.com.au/releases',
+  },
+}
 
 export default function AllPressReleasesPage() {
   return (
