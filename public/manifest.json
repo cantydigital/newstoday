@@ -1,0 +1,27 @@
+{
+  "name": "News Today - Australia's Trusted Press Release Service",
+  "short_name": "News Today",
+  "description": "Publish your press releases across Australia in minutes. News Today is a reliable press release service that helps businesses publish, promote, and get media coverage easily.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
