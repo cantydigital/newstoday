@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { getPressReleases } from "@/lib/press-releases"
+import { getPressReleases, deletePressRelease } from "@/lib/press-releases"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
-import { Search, Eye, Calendar, User, Building, Edit } from "lucide-react"
+import { Search, Eye, Calendar, User, Building, Edit, Trash2 } from "lucide-react"
 import { truncateHtml } from "@/lib/html-utils"
 import EditPressReleaseDialog from "./edit-press-release-form"
 
@@ -20,6 +20,7 @@ export default function AllPressReleases() {
   const [filteredReleases, setFilteredReleases] = useState<PressRelease[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadReleases = async () => {
     try {
@@ -53,6 +54,23 @@ export default function AllPressReleases() {
 
   const handleEditSuccess = () => {
     loadReleases() // Reload the releases to show updated data
+  }
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+      return
+    }
+
+    setDeletingId(id)
+    try {
+      await deletePressRelease(id)
+      await loadReleases() // Reload the releases
+    } catch (error) {
+      console.error("Error deleting press release:", error)
+      alert("Failed to delete press release. Please try again.")
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   if (isLoading) {
@@ -158,6 +176,20 @@ export default function AllPressReleases() {
                         Edit
                       </Button>
                     </EditPressReleaseDialog>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleDelete(release.id, release.title)}
+                      disabled={deletingId === release.id}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      {deletingId === release.id ? (
+                        <div className="h-4 w-4 mr-1 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 mr-1" />
+                      )}
+                      {deletingId === release.id ? "Deleting..." : "Delete"}
+                    </Button>
                   </div>
                 </div>
               ))}

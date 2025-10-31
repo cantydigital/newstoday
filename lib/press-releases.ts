@@ -10,4 +10,5 @@ export {
   approvePressRelease,
   rejectPressRelease,
   updatePressRelease,
+  deletePressRelease,
 } from "./press-releases-supabase"

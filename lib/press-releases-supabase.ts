@@ -215,6 +215,18 @@ export async function updatePressRelease(id: string, data: PressReleaseFormData)
   }
 }
 
+export async function deletePressRelease(id: string): Promise<void> {
+  const { error } = await supabase
+    .from(TABLE_NAME)
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error("Error deleting press release:", error)
+    throw new Error(`Failed to delete press release: ${error.message}`)
+  }
+}
+
 // Helper function to transform Supabase row to PressRelease interface
 function transformSupabaseToPressRelease(row: any): PressRelease {
   return {
