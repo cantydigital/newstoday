@@ -167,7 +167,7 @@ export default async function PressReleasePage({ params }: PressReleasePageProps
                   <img
                     src={release.imageUrl}
                     alt={release.title}
-                    className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+                    className="w-full h-auto object-contain rounded-lg shadow-lg"
                   />
                 </div>
               )}

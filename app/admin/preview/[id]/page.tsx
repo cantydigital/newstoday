@@ -244,7 +244,7 @@ export default function PreviewDraftPage() {
                   <img 
                     src={draft.imageUrl} 
                     alt={draft.title}
-                    className="w-full h-64 object-cover rounded-lg"
+                    className="w-full h-auto object-contain rounded-lg"
                   />
                 </div>
               )}
