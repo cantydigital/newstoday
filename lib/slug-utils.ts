@@ -10,9 +10,6 @@ export function generateSlug(title: string): string {
     .replace(/[\s_-]+/g, '-')
     // Remove leading/trailing hyphens
     .replace(/^-+|-+$/g, '')
-    // Limit length to 100 characters
-    .substring(0, 100)
-    .replace(/-+$/, '') // Remove trailing hyphen if substring cut in middle of word
 }
 
 /**
@@ -41,5 +38,5 @@ export function generateUniqueSlug(title: string, existingSlugs: string[]): stri
  */
 export function isValidSlug(slug: string): boolean {
   const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-  return slugRegex.test(slug) && slug.length > 0 && slug.length <= 100
+  return slugRegex.test(slug) && slug.length > 0
 }
