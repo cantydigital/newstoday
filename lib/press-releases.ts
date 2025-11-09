@@ -6,6 +6,7 @@ export {
   getPressReleaseById,
   getPressReleaseBySlug,
   getFeaturedPressReleases,
+  getRecentPressReleases,
   getDraftPressReleases,
   approvePressRelease,
   rejectPressRelease,

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { getPressReleaseBySlug } from "@/lib/press-releases"
+import { getPressReleaseBySlug, getRecentPressReleases } from "@/lib/press-releases"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
 import HtmlContent from "@/components/ui/html-content"
@@ -88,7 +88,10 @@ export async function generateMetadata({ params }: PressReleasePageProps): Promi
 }
 
 export default async function PressReleasePage({ params }: PressReleasePageProps) {
-  const release = await getPressReleaseBySlug(params.slug)
+  const [release, recentReleases] = await Promise.all([
+    getPressReleaseBySlug(params.slug),
+    getRecentPressReleases(params.slug, 5)
+  ])
 
   if (!release || release.status !== "published") {
     notFound()
@@ -120,9 +123,12 @@ export default async function PressReleasePage({ params }: PressReleasePageProps
       />
 
       <main className="pt-20">
-        <article className="py-6 md:py-8">
+        <div className="py-6 md:py-8">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-7xl mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content */}
+                <article className="lg:col-span-2">
               
               {/* Header */}
               <div className="mb-8">
@@ -241,9 +247,74 @@ export default async function PressReleasePage({ params }: PressReleasePageProps
                   </Link>
                 </Button>
               </div>
+                </article>
+
+                {/* Sidebar */}
+                <aside className="lg:col-span-1">
+                  <div className="sticky top-24">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <h3 className="text-lg font-semibold text-foreground mb-4">
+                          Recent Press Releases
+                        </h3>
+                        <div className="space-y-4">
+                          {recentReleases.length > 0 ? (
+                            recentReleases.map((recentRelease) => (
+                              <Link
+                                key={recentRelease.id}
+                                href={`/releases/${recentRelease.slug}`}
+                                className="block group"
+                              >
+                                <div className="border-b border-border pb-4 last:border-b-0 last:pb-0">
+                                  <div className="flex items-start gap-3">
+                                    {recentRelease.imageUrl && (
+                                      <img
+                                        src={recentRelease.imageUrl}
+                                        alt={recentRelease.title}
+                                        className="w-16 h-12 object-cover rounded flex-shrink-0"
+                                      />
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1">
+                                        {recentRelease.title}
+                                      </h4>
+                                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Badge variant="outline" className="text-xs">
+                                          {recentRelease.category}
+                                        </Badge>
+                                        <span>•</span>
+                                        <span>{format(recentRelease.publishedAt!, "MMM dd")}</span>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        {recentRelease.company}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              No recent press releases available.
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div className="mt-6 pt-4 border-t border-border">
+                          <Button variant="outline" size="sm" asChild className="w-full">
+                            <Link href="/releases">
+                              View All Press Releases
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </aside>
+              </div>
             </div>
           </div>
-        </article>
+        </div>
       </main>
 
       <Footer />

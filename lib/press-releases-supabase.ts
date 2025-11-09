@@ -147,6 +147,32 @@ export async function getFeaturedPressReleases(): Promise<PressRelease[]> {
   return data.map(transformSupabaseToPressRelease)
 }
 
+export async function getRecentPressReleases(excludeSlug?: string, limitCount = 5): Promise<PressRelease[]> {
+  let query = supabase
+    .from(TABLE_NAME)
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false })
+    .limit(limitCount + (excludeSlug ? 1 : 0)) // Get one extra if we need to exclude current
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error("Error fetching recent press releases:", error)
+    return []
+  }
+
+  let releases = data.map(transformSupabaseToPressRelease)
+  
+  // Filter out the current press release if excludeSlug is provided
+  if (excludeSlug) {
+    releases = releases.filter(release => release.slug !== excludeSlug)
+    releases = releases.slice(0, limitCount) // Ensure we don't exceed the limit
+  }
+
+  return releases
+}
+
 export async function getDraftPressReleases(): Promise<PressRelease[]> {
   const { data, error } = await supabase
     .from(TABLE_NAME)
