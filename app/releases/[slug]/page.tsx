@@ -14,13 +14,14 @@ import { generatePressReleaseStructuredData } from "@/lib/seo-utils"
 import type { Metadata } from "next"
 
 interface PressReleasePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export async function generateMetadata({ params }: PressReleasePageProps): Promise<Metadata> {
-  const release = await getPressReleaseBySlug(params.slug)
+  const { slug } = await params
+  const release = await getPressReleaseBySlug(slug)
   
   if (!release) {
     return {
@@ -88,9 +89,10 @@ export async function generateMetadata({ params }: PressReleasePageProps): Promi
 }
 
 export default async function PressReleasePage({ params }: PressReleasePageProps) {
+  const { slug } = await params
   const [release, recentReleases] = await Promise.all([
-    getPressReleaseBySlug(params.slug),
-    getRecentPressReleases(params.slug, 5)
+    getPressReleaseBySlug(slug),
+    getRecentPressReleases(slug, 5)
   ])
 
   if (!release || release.status !== "published") {
