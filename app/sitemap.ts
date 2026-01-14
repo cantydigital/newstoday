@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { getPressReleases } from '@/lib/press-releases'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://newstoday.com.au'
+  const baseUrl = 'https://newstoday.au'
   
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
