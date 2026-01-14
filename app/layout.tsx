@@ -38,14 +38,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://newstoday.com.au'),
+  metadataBase: new URL('https://newstoday.au'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'en_AU',
-    url: 'https://newstoday.com.au',
+    url: 'https://newstoday.au',
     title: "News Today - Australia's Trusted Press Release Service",
     description: "Publish your press releases across Australia in minutes. News Today is a reliable press release service that helps businesses publish, promote, and get media coverage easily.",
     siteName: 'News Today',
@@ -114,8 +114,8 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "News Today",
-    "url": "https://newstoday.com.au",
-    "logo": "https://newstoday.com.au/logo.png",
+    "url": "https://newstoday.au",
+    "logo": "https://newstoday.au/logo.png",
     "description": "Australia's trusted press release distribution service helping businesses get media coverage across the country.",
     "address": {
       "@type": "PostalAddress",
