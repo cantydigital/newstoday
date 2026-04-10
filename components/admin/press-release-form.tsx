@@ -25,6 +25,7 @@ const categories = [
   "Sports",
   "Environment",
   "Politics",
+  "Beauty",
   "Other",
 ]
 
