@@ -14,6 +14,17 @@ import { format } from "date-fns"
 import { Search, Eye, Calendar, User, Building, Edit, Trash2 } from "lucide-react"
 import { truncateHtml } from "@/lib/html-utils"
 import EditPressReleaseDialog from "./edit-press-release-form"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
+
+const PAGE_SIZE = 10
 
 export default function AllPressReleases() {
   const [releases, setReleases] = useState<PressRelease[]>([])
@@ -21,6 +32,7 @@ export default function AllPressReleases() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const loadReleases = async () => {
     try {
@@ -50,7 +62,29 @@ export default function AllPressReleases() {
       )
       setFilteredReleases(filtered)
     }
+    setCurrentPage(1)
   }, [searchQuery, releases])
+
+  const totalPages = Math.max(1, Math.ceil(filteredReleases.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, totalPages)
+  const startIndex = (safePage - 1) * PAGE_SIZE
+  const paginatedReleases = filteredReleases.slice(startIndex, startIndex + PAGE_SIZE)
+
+  const getPageNumbers = (): (number | "ellipsis")[] => {
+    const pages: (number | "ellipsis")[] = []
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i)
+      return pages
+    }
+    pages.push(1)
+    if (safePage > 3) pages.push("ellipsis")
+    const start = Math.max(2, safePage - 1)
+    const end = Math.min(totalPages - 1, safePage + 1)
+    for (let i = start; i <= end; i++) pages.push(i)
+    if (safePage < totalPages - 2) pages.push("ellipsis")
+    pages.push(totalPages)
+    return pages
+  }
 
   const handleEditSuccess = () => {
     loadReleases() // Reload the releases to show updated data
@@ -120,7 +154,7 @@ export default function AllPressReleases() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredReleases.map((release) => (
+              {paginatedReleases.map((release) => (
                 <div key={release.id} className="border rounded-lg p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -193,6 +227,60 @@ export default function AllPressReleases() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {filteredReleases.length > PAGE_SIZE && (
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-muted-foreground">
+                Showing {startIndex + 1}-{Math.min(startIndex + PAGE_SIZE, filteredReleases.length)} of {filteredReleases.length}
+              </p>
+              <Pagination className="mx-0 sm:ml-auto w-auto justify-end">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (safePage > 1) setCurrentPage(safePage - 1)
+                      }}
+                      aria-disabled={safePage === 1}
+                      className={safePage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  {getPageNumbers().map((page, idx) =>
+                    page === "ellipsis" ? (
+                      <PaginationItem key={`ellipsis-${idx}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === safePage}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setCurrentPage(page)
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  )}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (safePage < totalPages) setCurrentPage(safePage + 1)
+                      }}
+                      aria-disabled={safePage === totalPages}
+                      className={safePage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </CardContent>
