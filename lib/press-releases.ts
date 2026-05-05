@@ -8,8 +8,10 @@ export {
   getFeaturedPressReleases,
   getRecentPressReleases,
   getDraftPressReleases,
+  getRejectedPressReleases,
   approvePressRelease,
   rejectPressRelease,
+  restorePressReleaseToDraft,
   updatePressRelease,
   deletePressRelease,
 } from "./press-releases-supabase"

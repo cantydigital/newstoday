@@ -3,13 +3,14 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Eye, Plus, Newspaper, MessageSquare } from "lucide-react"
+import { FileText, Eye, Plus, Newspaper, MessageSquare, XCircle } from "lucide-react"
 
 interface AdminSidebarProps {
   activeView: string
   onViewChange: (view: string) => void
   draftCount?: number
   newContactCount?: number
+  rejectedCount?: number
 }
 
 const sidebarItems = [
@@ -26,6 +27,12 @@ const sidebarItems = [
     description: "Review and approve draft submissions"
   },
   {
+    id: "rejected-releases",
+    label: "Rejected Releases",
+    icon: XCircle,
+    description: "Review, restore, or delete rejected submissions"
+  },
+  {
     id: "submit-release",
     label: "Submit Press Release", 
     icon: Plus,
@@ -39,7 +46,7 @@ const sidebarItems = [
   }
 ]
 
-export default function AdminSidebar({ activeView, onViewChange, draftCount = 0, newContactCount = 0 }: AdminSidebarProps) {
+export default function AdminSidebar({ activeView, onViewChange, draftCount = 0, newContactCount = 0, rejectedCount = 0 }: AdminSidebarProps) {
   return (
     <div className="w-64 bg-card border-r border-border h-full">
       <div className="p-6 border-b border-border">
@@ -58,8 +65,14 @@ export default function AdminSidebar({ activeView, onViewChange, draftCount = 0,
             const Icon = item.icon
             const isActive = activeView === item.id
             const showBadge = (item.id === "review-releases" && draftCount > 0) || 
-                             (item.id === "contact-submissions" && newContactCount > 0)
-            const badgeCount = item.id === "review-releases" ? draftCount : newContactCount
+                             (item.id === "contact-submissions" && newContactCount > 0) ||
+                             (item.id === "rejected-releases" && rejectedCount > 0)
+            const badgeCount =
+              item.id === "review-releases"
+                ? draftCount
+                : item.id === "contact-submissions"
+                ? newContactCount
+                : rejectedCount
             
             return (
               <Button

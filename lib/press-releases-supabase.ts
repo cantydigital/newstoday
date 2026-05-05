@@ -188,6 +188,36 @@ export async function getDraftPressReleases(): Promise<PressRelease[]> {
   return data.map(transformSupabaseToPressRelease)
 }
 
+export async function getRejectedPressReleases(): Promise<PressRelease[]> {
+  const { data, error } = await supabase
+    .from(TABLE_NAME)
+    .select('*')
+    .eq('status', 'rejected')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error("Error fetching rejected press releases:", error)
+    return []
+  }
+
+  return data.map(transformSupabaseToPressRelease)
+}
+
+export async function restorePressReleaseToDraft(id: string): Promise<void> {
+  const { error } = await supabase
+    .from(TABLE_NAME)
+    .update({
+      status: "draft" as PressReleaseStatus,
+      rejection_reason: null,
+    })
+    .eq('id', id)
+
+  if (error) {
+    console.error("Error restoring press release to draft:", error)
+    throw new Error(`Failed to restore press release: ${error.message}`)
+  }
+}
+
 export async function approvePressRelease(id: string): Promise<void> {
   const { error } = await supabase
     .from(TABLE_NAME)

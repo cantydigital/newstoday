@@ -34,6 +34,15 @@ const categories = [
   "Environment",
   "Politics",
   "Beauty",
+  "Home & Lifestyle",
+  "Science & Research",
+  "Travel & Tourism",
+  "Food & Beverage",
+  "Automotive",
+  "Legal",
+  "Non-Profit & Charity",
+  "Energy",
+  "Retail & E-commerce",
   "Other",
 ]
 

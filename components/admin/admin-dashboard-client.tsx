@@ -4,26 +4,30 @@ import { useState, useEffect } from "react"
 import AdminSidebar from "@/components/admin/admin-sidebar"
 import AllPressReleases from "@/components/admin/all-press-releases"
 import DraftManagement from "@/components/admin/draft-management"
+import RejectedManagement from "@/components/admin/rejected-management"
 import PressReleaseForm from "@/components/admin/press-release-form"
 import ContactSubmissions from "@/components/admin/contact-submissions"
-import { getDraftPressReleases } from "@/lib/press-releases"
+import { getDraftPressReleases, getRejectedPressReleases } from "@/lib/press-releases"
 import { getNewContactSubmissions } from "@/lib/contact-submissions"
 
 export default function AdminDashboardClient() {
   const [activeView, setActiveView] = useState("all-releases")
   const [draftCount, setDraftCount] = useState(0)
   const [newContactCount, setNewContactCount] = useState(0)
+  const [rejectedCount, setRejectedCount] = useState(0)
 
   // Load counts for sidebar badges
   useEffect(() => {
     const loadCounts = async () => {
       try {
-        const [drafts, newContacts] = await Promise.all([
+        const [drafts, newContacts, rejected] = await Promise.all([
           getDraftPressReleases(),
-          getNewContactSubmissions()
+          getNewContactSubmissions(),
+          getRejectedPressReleases()
         ])
         setDraftCount(drafts.length)
         setNewContactCount(newContacts.length)
+        setRejectedCount(rejected.length)
       } catch (error) {
         console.error("Error loading counts:", error)
       }
@@ -58,6 +62,16 @@ export default function AdminDashboardClient() {
             <DraftManagement />
           </div>
         )
+      case "rejected-releases":
+        return (
+          <div className="space-y-6">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-2">Rejected Releases</h2>
+              <p className="text-muted-foreground">Review rejected submissions and restore them to drafts or delete them permanently</p>
+            </div>
+            <RejectedManagement />
+          </div>
+        )
       case "submit-release":
         return (
           <div className="space-y-6">
@@ -90,6 +104,7 @@ export default function AdminDashboardClient() {
         onViewChange={setActiveView}
         draftCount={draftCount}
         newContactCount={newContactCount}
+        rejectedCount={rejectedCount}
       />
       
       <main className="flex-1 p-8 overflow-y-auto">
