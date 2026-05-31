@@ -7,6 +7,7 @@ import DraftManagement from "@/components/admin/draft-management"
 import RejectedManagement from "@/components/admin/rejected-management"
 import PressReleaseForm from "@/components/admin/press-release-form"
 import ContactSubmissions from "@/components/admin/contact-submissions"
+import UsersManagement from "@/components/admin/users-management"
 import { getDraftPressReleases, getRejectedPressReleases } from "@/lib/press-releases"
 import { getNewContactSubmissions } from "@/lib/contact-submissions"
 
@@ -90,6 +91,20 @@ export default function AdminDashboardClient() {
               <p className="text-muted-foreground">View and manage contact form submissions</p>
             </div>
             <ContactSubmissions />
+          </div>
+        )
+      case "users-credits":
+        return (
+          <div className="space-y-6">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-foreground mb-2">Users & Credits</h2>
+              <p className="text-muted-foreground">
+                Press release credits are linked to email. Stripe purchases
+                automatically add credits; you can also grant or revoke credits
+                manually.
+              </p>
+            </div>
+            <UsersManagement />
           </div>
         )
       default:

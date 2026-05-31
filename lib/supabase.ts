@@ -26,6 +26,8 @@ export type Database = {
           featured: boolean | null
           image_url: string | null
           rejection_reason: string | null
+          payment_received: boolean
+          published_url: string | null
         }
         Insert: {
           id?: string
@@ -43,6 +45,8 @@ export type Database = {
           featured?: boolean | null
           image_url?: string | null
           rejection_reason?: string | null
+          payment_received?: boolean
+          published_url?: string | null
         }
         Update: {
           id?: string
@@ -60,6 +64,8 @@ export type Database = {
           featured?: boolean | null
           image_url?: string | null
           rejection_reason?: string | null
+          payment_received?: boolean
+          published_url?: string | null
         }
       }
       contact_submissions: {

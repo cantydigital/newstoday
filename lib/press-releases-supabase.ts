@@ -302,5 +302,7 @@ function transformSupabaseToPressRelease(row: any): PressRelease {
     featured: row.featured || false,
     imageUrl: row.image_url,
     rejectionReason: row.rejection_reason,
+    paymentReceived: row.payment_received ?? false,
+    publishedUrl: row.published_url ?? null,
   }
 }

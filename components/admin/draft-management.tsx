@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { getDraftPressReleases, approvePressRelease, rejectPressRelease } from "@/lib/press-releases"
+import { getDraftPressReleases, rejectPressRelease } from "@/lib/press-releases"
+import { approveAndNotifyAction } from "@/app/admin/dashboard/actions"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
-import { CheckCircle2, XCircle, Eye, Calendar, User, Building } from "lucide-react"
+import { CheckCircle2, XCircle, Eye, Calendar, User, Building, MailCheck, MailX, CreditCard, AlertCircle } from "lucide-react"
 
 export default function DraftManagement() {
   const [drafts, setDrafts] = useState<PressRelease[]>([])
@@ -20,6 +21,7 @@ export default function DraftManagement() {
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
   const [rejectingId, setRejectingId] = useState<string | null>(null)
+  const [flash, setFlash] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const loadDrafts = async () => {
     try {
@@ -38,11 +40,32 @@ export default function DraftManagement() {
 
   const handleApprove = async (id: string) => {
     setProcessingId(id)
+    setFlash(null)
     try {
-      await approvePressRelease(id)
+      const result = await approveAndNotifyAction(id)
+      if (result.sent) {
+        setFlash({
+          type: "success",
+          text: `Published and notification email sent. Live URL: ${result.liveUrl}`,
+        })
+      } else {
+        setFlash({
+          type: "error",
+          text: `Published successfully, but email failed to send (${
+            result.reason ?? "unknown"
+          }). Live URL: ${result.liveUrl}`,
+        })
+      }
       await loadDrafts() // Reload the list
     } catch (error) {
       console.error("Error approving press release:", error)
+      setFlash({
+        type: "error",
+        text:
+          error instanceof Error
+            ? error.message
+            : "Failed to publish press release",
+      })
     } finally {
       setProcessingId(null)
     }
@@ -111,20 +134,49 @@ export default function DraftManagement() {
         <CardDescription>Review and approve press release submissions</CardDescription>
       </CardHeader>
       <CardContent>
+        {flash && (
+          <div
+            className={`mb-4 p-3 rounded-lg border text-sm flex items-start gap-2 ${
+              flash.type === "success"
+                ? "bg-green-50 border-green-200 text-green-900"
+                : "bg-red-50 border-red-200 text-red-900"
+            }`}
+          >
+            {flash.type === "success" ? (
+              <MailCheck className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            ) : (
+              <MailX className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            )}
+            <span className="break-all">{flash.text}</span>
+          </div>
+        )}
         <div className="space-y-4">
           {drafts.map((draft) => (
             <div key={draft.id} className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <h3 className="font-semibold text-foreground line-clamp-2">{draft.title}</h3>
                   {draft.subtitle && (
                     <p className="text-sm text-muted-foreground line-clamp-1 mt-1">{draft.subtitle}</p>
                   )}
                 </div>
-                <Badge variant="outline">{draft.category}</Badge>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {draft.paymentReceived ? (
+                    <Badge className="bg-green-600 hover:bg-green-600">
+                      <CreditCard className="h-3 w-3 mr-1" />
+                      Paid
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
+                      <AlertCircle className="h-3 w-3 mr-1" />
+                      Unpaid
+                    </Badge>
+                  )}
+                  <Badge variant="outline">{draft.category}</Badge>
+                </div>
               </div>
 
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center flex-wrap gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   <span>{format(draft.createdAt, "MMM dd, yyyy 'at' HH:mm")}</span>
@@ -137,6 +189,7 @@ export default function DraftManagement() {
                   <User className="h-3 w-3" />
                   <span>{draft.author}</span>
                 </div>
+                <span className="font-mono text-[10px]">{draft.contactEmail}</span>
               </div>
 
               <p className="text-sm text-muted-foreground line-clamp-3">{draft.content}</p>

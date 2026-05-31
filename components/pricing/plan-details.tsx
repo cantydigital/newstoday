@@ -3,33 +3,28 @@ import { Check, Star } from "lucide-react"
 
 const planDetails = [
   {
-    name: "Free Plan",
-    description: "Ideal for startups and small companies making their first steps in press distribution.",
+    name: "Single Release \u2014 $39",
+    description:
+      "Perfect for one-off announcements, product launches, and businesses publishing for the first time on News Today.",
     highlights: [
-      "Publish your initial press statement free of charge",
-      "Get a professional appearance on News Today",
-      "Access to journalists and readers in Australia"
-    ]
+      "1 press release credit, no subscription",
+      "Editorial review by our team",
+      "SEO-ready formatting for Google News & search",
+      "Live on News Today within 24\u201348 hours",
+    ],
   },
   {
-    name: "Standard Plan",
-    description: "Aimed at businesses that do frequent news sharing and prefer more visibility.",
+    name: "10 Release Bundle \u2014 $300",
+    description:
+      "Designed for PR agencies, marketing teams, and businesses with a steady drumbeat of announcements. Save 23% compared to buying singles.",
     highlights: [
-      "Selective distribution to targeted industries",
-      "Google News & search engines release formatting, SEO-ready",
-      "Email alerts to journalists and media partners"
-    ]
+      "10 press release credits (effective $30 per release)",
+      "Priority editorial review",
+      "Credits never expire and are linked to your email",
+      "Category and homepage placement eligibility",
+      "Email alerts to journalists and media partners",
+    ],
   },
-  {
-    name: "Premium Plan",
-    description: "Perfect for PR agencies, marketing companies, or businesses requiring maximum impact.",
-    highlights: [
-      "Special editorial consideration for professional appearance",
-      "Placement on home page and category pages of News Today",
-      "Advanced analytics to monitor reach, engagement and views",
-      "Media outreach services for additional exposure"
-    ]
-  }
 ]
 
 export default function PlanDetails() {

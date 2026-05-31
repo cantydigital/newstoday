@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Eye, Plus, Newspaper, MessageSquare, XCircle } from "lucide-react"
+import { FileText, Eye, Plus, Newspaper, MessageSquare, XCircle, Users } from "lucide-react"
 
 interface AdminSidebarProps {
   activeView: string
@@ -43,6 +43,12 @@ const sidebarItems = [
     label: "Contact Submissions",
     icon: MessageSquare,
     description: "View and manage contact form submissions"
+  },
+  {
+    id: "users-credits",
+    label: "Users & Credits",
+    icon: Users,
+    description: "Manage paid press release credits per email"
   }
 ]
 

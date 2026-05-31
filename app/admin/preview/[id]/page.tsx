@@ -9,10 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { getPressReleaseById, approvePressRelease, rejectPressRelease } from "@/lib/press-releases"
+import { getPressReleaseById, rejectPressRelease } from "@/lib/press-releases"
+import { approveAndNotifyAction } from "@/app/admin/dashboard/actions"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
-import { ArrowLeft, CheckCircle2, XCircle, Calendar, User, Building, Mail, Phone } from "lucide-react"
+import { ArrowLeft, CheckCircle2, XCircle, Calendar, User, Building, Mail, Phone, CreditCard, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
@@ -53,14 +54,22 @@ export default function PreviewDraftPage() {
 
   const handleApprove = async () => {
     if (!draft) return
-    
+
     setProcessingId(draft.id)
     try {
-      await approvePressRelease(draft.id)
+      const result = await approveAndNotifyAction(draft.id)
+      if (!result.sent) {
+        // Still navigated to the dashboard, but warn admin that email failed.
+        console.warn("[admin] publish email did not send:", result.reason)
+      }
       router.push("/admin/dashboard")
     } catch (error) {
       console.error("Error approving press release:", error)
-      setError("Failed to approve press release")
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to approve press release"
+      )
     } finally {
       setProcessingId(null)
     }
@@ -211,9 +220,20 @@ export default function PreviewDraftPage() {
           {/* Press Release Preview */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <Badge variant="outline" className="mb-2">{draft.category}</Badge>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline">{draft.category}</Badge>
+                    {draft.paymentReceived ? (
+                      <Badge className="bg-green-600 hover:bg-green-600">
+                        <CreditCard className="h-3 w-3 mr-1" /> Paid
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
+                        <AlertCircle className="h-3 w-3 mr-1" /> Unpaid
+                      </Badge>
+                    )}
+                  </div>
                   <CardTitle className="text-2xl">{draft.title}</CardTitle>
                   {draft.subtitle && (
                     <CardDescription className="text-lg mt-2">{draft.subtitle}</CardDescription>

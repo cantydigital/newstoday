@@ -11,7 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import ImageUpload from "@/components/ui/image-upload"
-import { createDraftPressRelease } from "@/lib/press-releases"
 import type { PressReleaseFormData } from "@/types/press-release"
 import { ArrowLeft, CheckCircle2, Clock } from "lucide-react"
 import Link from "next/link"
@@ -45,6 +44,7 @@ const categories = [
 export default function SubmitPressReleasePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [paymentReceived, setPaymentReceived] = useState(false)
   const [error, setError] = useState("")
 
   const [formData, setFormData] = useState<PressReleaseFormData>({
@@ -67,7 +67,19 @@ export default function SubmitPressReleasePage() {
     setIsLoading(true)
 
     try {
-      await createDraftPressRelease(formData)
+      const response = await fetch("/api/press-release/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json().catch(() => ({}))
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || "Submission failed")
+      }
+
+      setPaymentReceived(Boolean(result.payment_received))
       setSuccess(true)
       // Reset form
       setFormData({
@@ -83,7 +95,11 @@ export default function SubmitPressReleasePage() {
         imageUrl: "",
       })
     } catch (err) {
-      setError("Failed to submit press release. Please try again.")
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to submit press release. Please try again."
+      )
       console.error("Error submitting press release:", err)
     } finally {
       setIsLoading(false)
@@ -116,13 +132,39 @@ export default function SubmitPressReleasePage() {
             <p className="text-lg text-muted-foreground mb-6">
               Thank you for submitting your press release. It has been received and is now pending review by our editorial team.
             </p>
+            {paymentReceived ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6 text-left">
+                <p className="text-sm text-green-900 font-semibold mb-1">
+                  Payment applied — 1 credit used
+                </p>
+                <p className="text-sm text-green-800">
+                  We matched your email to a paid credit balance. Your release
+                  will be prioritised by our editorial team.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6 text-left">
+                <p className="text-sm text-amber-900 font-semibold mb-1">
+                  No matching paid credit found
+                </p>
+                <p className="text-sm text-amber-800">
+                  We couldn't find a paid credit linked to{" "}
+                  <strong>this email</strong>. Your release has still been saved
+                  as a draft and will be reviewed. To guarantee publication,{" "}
+                  <Link href="/pricing" className="underline font-medium">
+                    purchase a credit on our pricing page
+                  </Link>{" "}
+                  using the same email you submitted with.
+                </p>
+              </div>
+            )}
             <div className="bg-muted/50 rounded-lg p-6 mb-8">
               <div className="flex items-center gap-2 justify-center mb-2">
                 <Clock className="h-5 w-5 text-primary" />
                 <span className="font-semibold text-foreground">What happens next?</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Our team will review your submission within 24-48 hours. If approved, your press release will be published on News Today and distributed through our media network.
+                Our team will review your submission within 24-48 hours. If approved, your press release will be published on News Today and you'll receive an email with the live URL.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -165,16 +207,28 @@ export default function SubmitPressReleasePage() {
             </p>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-start gap-3">
               <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-blue-900 mb-1">Review Process</h3>
                 <p className="text-sm text-blue-800">
-                  All submissions go through our editorial review process. Approved releases are published within 24-48 hours and distributed through our media network.
+                  All submissions go through our editorial review process. Approved releases are published within 24-48 hours and you'll receive an email with the live URL.
                 </p>
               </div>
             </div>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+            <p className="text-sm text-amber-900">
+              <strong>Already paid?</strong> Use the same email address you used
+              at Stripe checkout below and your credit will be applied automatically.
+              Haven't paid yet?{" "}
+              <Link href="/pricing" className="underline font-medium">
+                See pricing
+              </Link>
+              .
+            </p>
           </div>
 
           <Card>

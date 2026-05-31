@@ -4,55 +4,49 @@ import { Badge } from "@/components/ui/badge"
 import { Check } from "lucide-react"
 import Link from "next/link"
 
+const SINGLE_LINK =
+  process.env.NEXT_PUBLIC_STRIPE_SINGLE_PAYMENT_LINK ||
+  "https://buy.stripe.com/4gMcN5fhpaxPgBWbQzao80U"
+const BUNDLE_LINK =
+  process.env.NEXT_PUBLIC_STRIPE_BUNDLE_PAYMENT_LINK ||
+  "https://buy.stripe.com/14A14n8T121j1H24o7ao80V"
+
 const plans = [
   {
-    name: "Free",
-    price: "$0",
-    subtitle: "Small business and first-time users",
-    features: [
-      "Publish 1 press release per month",
-      "Basic formatting & classes",
-      "Live on News Today website",
-      "Limited SEO optimization"
-    ],
-    buttonText: "Get Started Free",
-    buttonVariant: "outline" as const,
-    popular: false
-  },
-  {
-    name: "Standard",
-    price: "$49",
+    name: "Single Release",
+    price: "$39",
     priceUnit: "per release",
-    subtitle: "Emerging businesses and frequent PR necessities",
+    subtitle: "Perfect for one-off announcements and first-time publishers",
     features: [
-      "Publish up to 5 releases per month",
-      "SEO-optimized distribution",
-      "Category targeting",
-      "Placed in industry directories",
-      "News alerts to reporters"
-    ],
-    buttonText: "Choose Standard",
-    buttonVariant: "default" as const,
-    popular: true
-  },
-  {
-    name: "Premium",
-    price: "$99",
-    priceUnit: "per release",
-    subtitle: "Agencies and high-visibility campaigns",
-    features: [
-      "Unlimited press releases",
-      "Priority editorial review",
-      "Home page feature placement",
+      "1 press release credit",
+      "Editorial review",
+      "SEO-optimised distribution",
+      "Live on News Today within 24\u201348 hours",
       "Category placement",
-      "Advanced SEO & keyword optimization",
-      "Performance tracking & analytics dashboard",
-      "Media outreach support"
     ],
-    buttonText: "Choose Premium",
+    buttonText: "Buy 1 Release \u2014 $39",
     buttonVariant: "default" as const,
-    popular: false
-  }
+    popular: false,
+    href: SINGLE_LINK,
+  },
+  {
+    name: "10 Release Bundle",
+    price: "$300",
+    priceUnit: "for 10 releases",
+    subtitle: "Best value for agencies and frequent publishers \u2014 save 23%",
+    features: [
+      "10 press release credits",
+      "Effective $30 per release",
+      "Priority editorial review",
+      "SEO-optimised distribution",
+      "Category & homepage eligibility",
+      "Credits never expire",
+    ],
+    buttonText: "Buy 10 Releases \u2014 $300",
+    buttonVariant: "default" as const,
+    popular: true,
+    href: BUNDLE_LINK,
+  },
 ]
 
 export default function PricingPlans() {
@@ -65,7 +59,7 @@ export default function PricingPlans() {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {plans.map((plan) => (
             <Card key={plan.name} className={`relative border-border ${plan.popular ? 'ring-2 ring-primary' : ''}`}>
               {plan.popular && (
@@ -96,26 +90,36 @@ export default function PricingPlans() {
                     </li>
                   ))}
                 </ul>
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   variant={plan.buttonVariant}
                   asChild
                 >
-                  <Link href="/submit">
+                  <a href={plan.href} target="_blank" rel="noopener noreferrer">
                     {plan.buttonText}
-                  </Link>
+                  </a>
                 </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Secure checkout via Stripe. Credits are linked to the email
+                  you use at checkout.
+                </p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-sm text-muted-foreground mb-4">
-            <strong>Note:</strong> Large organizations or agencies with several clients can use custom enterprise packages.
+        <div className="text-center mt-12 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            After payment, head to <Link href="/submit" className="underline">our submission form</Link>{" "}
+            and use the same email address you paid with. Your credit will be
+            applied automatically.
           </p>
-          <Button variant="outline">
-            Contact Us for Custom Solutions
+          <p className="text-sm text-muted-foreground">
+            <strong>Need a custom enterprise package?</strong>{" "}
+            Large organisations and agencies with several clients can request a quote.
+          </p>
+          <Button variant="outline" asChild>
+            <Link href="/contact">Contact Us for Custom Solutions</Link>
           </Button>
         </div>
       </div>

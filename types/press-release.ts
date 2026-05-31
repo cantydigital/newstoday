@@ -17,6 +17,8 @@ export interface PressRelease {
   featured?: boolean
   imageUrl?: string
   rejectionReason?: string
+  paymentReceived?: boolean
+  publishedUrl?: string | null
 }
 
 export interface PressReleaseFormData {
