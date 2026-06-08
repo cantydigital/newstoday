@@ -1,11 +1,12 @@
-import DOMPurify from "isomorphic-dompurify"
+import sanitizeHtmlLib from "sanitize-html"
 
 /**
  * Strict allowlist sanitizer for user-submitted rich text (Tiptap output).
  *
- * Works on both server and client (isomorphic-dompurify). We sanitize on
- * storage (in the submit/update paths) AND on render (HtmlContent / preview)
- * so that any pre-existing unsanitized rows are also rendered safely.
+ * Server-only (uses sanitize-html, a pure Node.js CJS package with no DOM
+ * dependency). Call this at write time (submit / update paths) before
+ * persisting to the database. Client components render the already-sanitized
+ * content directly.
  */
 const ALLOWED_TAGS = [
   "p",
@@ -35,28 +36,19 @@ const ALLOWED_TAGS = [
   "hr",
 ]
 
-const ALLOWED_ATTR = [
-  "href",
-  "target",
-  "rel",
-  "src",
-  "alt",
-  "title",
-  "width",
-  "height",
-  "style",
-  "class",
-]
-
 export function sanitizeHtml(html: string | null | undefined): string {
   if (!html) return ""
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    // Block javascript:/data: URIs in href/src etc. Only allow safe schemes.
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
-    FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form"],
-    FORBID_ATTR: ["onerror", "onload", "onclick", "onmouseover"],
+  return sanitizeHtmlLib(html, {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: {
+      "*": ["style", "class"],
+      a: ["href", "target", "rel", "title"],
+      img: ["src", "alt", "title", "width", "height"],
+    },
+    allowedSchemes: ["https", "http", "mailto", "tel"],
+    allowedSchemesByTag: {
+      img: ["https", "http"],
+    },
   })
 }
 

@@ -14,7 +14,6 @@ import {
   rejectPressReleaseAction,
   fetchPressReleaseByIdAdmin,
 } from "@/app/admin/dashboard/actions"
-import { sanitizeHtml } from "@/lib/sanitize"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
 import { ArrowLeft, CheckCircle2, XCircle, Calendar, User, Building, Mail, Phone, CreditCard, AlertCircle } from "lucide-react"
@@ -277,7 +276,7 @@ export default function PreviewDraftPage() {
               <div className="prose prose-lg max-w-none">
                 <div 
                   className="text-foreground leading-relaxed [&>p]:mb-4 [&>h1]:mb-4 [&>h2]:mb-4 [&>h3]:mb-4 [&>ul]:mb-4 [&>ol]:mb-4"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(draft.content) }}
+                  dangerouslySetInnerHTML={{ __html: draft.content }}
                 />
               </div>
 
