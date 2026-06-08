@@ -115,7 +115,7 @@ export async function approveAndNotifyAction(
       published_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .select("id, slug, title, author, contact_email")
+    .select("id, slug, title, author, contact_email, purchase_email")
     .single()
 
   if (error || !data) {
@@ -133,7 +133,7 @@ export async function approveAndNotifyAction(
     .eq("id", id)
 
   const emailResult = await sendPressReleasePublishedEmail({
-    to: data.contact_email,
+    to: data.purchase_email ?? data.contact_email,
     authorName: data.author,
     pressReleaseTitle: data.title,
     liveUrl,

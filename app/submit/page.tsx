@@ -57,6 +57,7 @@ export default function SubmitPressReleasePage() {
     company: "",
     contactEmail: "",
     contactPhone: "",
+    purchaseEmail: "",
     featured: false,
     imageUrl: "",
   })
@@ -93,6 +94,7 @@ export default function SubmitPressReleasePage() {
         company: "",
         contactEmail: "",
         contactPhone: "",
+        purchaseEmail: "",
         featured: false,
         imageUrl: "",
       })
@@ -223,9 +225,9 @@ export default function SubmitPressReleasePage() {
 
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
             <p className="text-sm text-amber-900">
-              <strong>Already paid?</strong> Use the same email address you used
-              at Stripe checkout below and your credit will be applied automatically.
-              Haven't paid yet?{" "}
+              <strong>Already paid?</strong> Enter the email you used at Stripe
+              checkout in the <strong>Purchase Email</strong> field below and
+              your credit will be applied automatically. Haven't paid yet?{" "}
               <Link href="/pricing" className="underline font-medium">
                 See pricing
               </Link>
@@ -353,6 +355,21 @@ export default function SubmitPressReleasePage() {
                       disabled={isLoading}
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="purchaseEmail">Purchase Email</Label>
+                  <Input
+                    id="purchaseEmail"
+                    type="email"
+                    placeholder="email used at Stripe checkout"
+                    value={formData.purchaseEmail}
+                    onChange={(e) => handleChange("purchaseEmail", e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enter the email you used when purchasing your credit.
+                  </p>
                 </div>
 
                 <ImageUpload

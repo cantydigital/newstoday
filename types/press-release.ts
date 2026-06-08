@@ -30,6 +30,7 @@ export interface PressReleaseFormData {
   company: string
   contactEmail: string
   contactPhone?: string
+  purchaseEmail?: string
   featured?: boolean
   imageUrl?: string
 }

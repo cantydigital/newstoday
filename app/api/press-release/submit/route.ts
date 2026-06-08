@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
       company: body.company,
       contact_email: body.contactEmail,
       contact_phone: body.contactPhone ?? null,
+      purchase_email: body.purchaseEmail?.trim() || null,
       featured: body.featured ?? false,
       image_url: validateImageUrl(body.imageUrl),
       status: "draft",
@@ -107,13 +108,16 @@ export async function POST(req: NextRequest) {
   }
 
   // Try to consume a credit for this email. The submission is saved either way.
+  const creditEmail = body.purchaseEmail?.trim()
   let paid = false
   try {
-    const result = await consumeOneCredit({
-      email: body.contactEmail,
-      pressReleaseId: inserted.id,
-    })
-    paid = result.paid
+    if (creditEmail) {
+      const result = await consumeOneCredit({
+        email: creditEmail,
+        pressReleaseId: inserted.id,
+      })
+      paid = result.paid
+    }
   } catch (err) {
     console.error("[press-release/submit] credit consumption failed", err)
   }

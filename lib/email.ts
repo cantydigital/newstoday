@@ -7,7 +7,7 @@ const FROM_EMAIL =
 const resend = apiKey ? new Resend(apiKey) : null
 
 export type PressReleasePublishedEmail = {
-  to: string
+  to: string | string[]
   authorName: string
   pressReleaseTitle: string
   liveUrl: string
