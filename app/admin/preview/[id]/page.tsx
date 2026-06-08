@@ -9,8 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { getPressReleaseById, rejectPressRelease } from "@/lib/press-releases"
-import { approveAndNotifyAction } from "@/app/admin/dashboard/actions"
+import {
+  approveAndNotifyAction,
+  rejectPressReleaseAction,
+  fetchPressReleaseByIdAdmin,
+} from "@/app/admin/dashboard/actions"
+import { sanitizeHtml } from "@/lib/sanitize"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
 import { ArrowLeft, CheckCircle2, XCircle, Calendar, User, Building, Mail, Phone, CreditCard, AlertCircle } from "lucide-react"
@@ -33,7 +37,7 @@ export default function PreviewDraftPage() {
   useEffect(() => {
     const loadDraft = async () => {
       try {
-        const pressRelease = await getPressReleaseById(id)
+        const pressRelease = await fetchPressReleaseByIdAdmin(id)
         if (pressRelease) {
           setDraft(pressRelease)
         } else {
@@ -80,7 +84,7 @@ export default function PreviewDraftPage() {
     
     setProcessingId(draft.id)
     try {
-      await rejectPressRelease(draft.id, rejectionReason)
+      await rejectPressReleaseAction(draft.id, rejectionReason)
       router.push("/admin/dashboard")
     } catch (error) {
       console.error("Error rejecting press release:", error)
@@ -273,7 +277,7 @@ export default function PreviewDraftPage() {
               <div className="prose prose-lg max-w-none">
                 <div 
                   className="text-foreground leading-relaxed [&>p]:mb-4 [&>h1]:mb-4 [&>h2]:mb-4 [&>h3]:mb-4 [&>ul]:mb-4 [&>ol]:mb-4"
-                  dangerouslySetInnerHTML={{ __html: draft.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(draft.content) }}
                 />
               </div>
 

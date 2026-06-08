@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { getPressReleases, deletePressRelease } from "@/lib/press-releases"
+import { getPressReleases } from "@/lib/press-releases"
+import { deletePressReleaseAction } from "@/app/admin/dashboard/actions"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
 import { Search, Eye, Calendar, User, Building, Edit, Trash2 } from "lucide-react"
@@ -97,7 +98,7 @@ export default function AllPressReleases() {
 
     setDeletingId(id)
     try {
-      await deletePressRelease(id)
+      await deletePressReleaseAction(id)
       await loadReleases() // Reload the releases
     } catch (error) {
       console.error("Error deleting press release:", error)

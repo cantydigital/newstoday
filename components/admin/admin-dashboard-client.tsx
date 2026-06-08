@@ -8,8 +8,11 @@ import RejectedManagement from "@/components/admin/rejected-management"
 import PressReleaseForm from "@/components/admin/press-release-form"
 import ContactSubmissions from "@/components/admin/contact-submissions"
 import UsersManagement from "@/components/admin/users-management"
-import { getDraftPressReleases, getRejectedPressReleases } from "@/lib/press-releases"
-import { getNewContactSubmissions } from "@/lib/contact-submissions"
+import {
+  fetchDraftPressReleases,
+  fetchRejectedPressReleases,
+  fetchNewContactSubmissions,
+} from "@/app/admin/dashboard/actions"
 
 export default function AdminDashboardClient() {
   const [activeView, setActiveView] = useState("all-releases")
@@ -22,9 +25,9 @@ export default function AdminDashboardClient() {
     const loadCounts = async () => {
       try {
         const [drafts, newContacts, rejected] = await Promise.all([
-          getDraftPressReleases(),
-          getNewContactSubmissions(),
-          getRejectedPressReleases()
+          fetchDraftPressReleases(),
+          fetchNewContactSubmissions(),
+          fetchRejectedPressReleases()
         ])
         setDraftCount(drafts.length)
         setNewContactCount(newContacts.length)

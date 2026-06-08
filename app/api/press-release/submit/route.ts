@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { assertSupabaseAdmin } from "@/lib/supabase-admin"
 import { consumeOneCredit } from "@/lib/credits"
 import { generateUniqueSlug } from "@/lib/slug-utils"
+import { sanitizeHtml, validateImageUrl } from "@/lib/sanitize"
+import { verifyRecaptcha } from "@/lib/recaptcha"
 import type { PressReleaseFormData } from "@/types/press-release"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+
+const MAX_CONTENT_LENGTH = 100_000
 
 const REQUIRED_FIELDS: (keyof PressReleaseFormData)[] = [
   "title",
@@ -16,12 +20,29 @@ const REQUIRED_FIELDS: (keyof PressReleaseFormData)[] = [
   "contactEmail",
 ]
 
+type SubmitBody = PressReleaseFormData & { recaptchaToken?: string }
+
 export async function POST(req: NextRequest) {
-  let body: PressReleaseFormData
+  let body: SubmitBody
   try {
-    body = (await req.json()) as PressReleaseFormData
+    body = (await req.json()) as SubmitBody
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
+  }
+
+  // Bot protection.
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined
+  const captcha = await verifyRecaptcha(
+    body.recaptchaToken,
+    "submit_press_release",
+    ip
+  )
+  if (!captcha.success) {
+    return NextResponse.json(
+      { error: "Captcha verification failed. Please try again." },
+      { status: 400 }
+    )
   }
 
   for (const field of REQUIRED_FIELDS) {
@@ -32,6 +53,14 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+  }
+
+  // Cap the content size to avoid DB bloat / slow rendering.
+  if (body.content.length > MAX_CONTENT_LENGTH) {
+    return NextResponse.json(
+      { error: "Content exceeds the maximum allowed length" },
+      { status: 400 }
+    )
   }
 
   const supabase = assertSupabaseAdmin()
@@ -56,14 +85,14 @@ export async function POST(req: NextRequest) {
       title: body.title,
       slug,
       subtitle: body.subtitle ?? null,
-      content: body.content,
+      content: sanitizeHtml(body.content),
       category: body.category,
       author: body.author,
       company: body.company,
       contact_email: body.contactEmail,
       contact_phone: body.contactPhone ?? null,
       featured: body.featured ?? false,
-      image_url: body.imageUrl ?? null,
+      image_url: validateImageUrl(body.imageUrl),
       status: "draft",
       payment_received: false,
     })

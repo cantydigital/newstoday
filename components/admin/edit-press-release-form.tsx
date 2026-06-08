@@ -18,7 +18,7 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog"
-import { updatePressRelease } from "@/lib/press-releases"
+import { updatePressReleaseAction } from "@/app/admin/dashboard/actions"
 import type { PressRelease, PressReleaseFormData } from "@/types/press-release"
 import { Edit } from "lucide-react"
 
@@ -92,7 +92,7 @@ export default function EditPressReleaseDialog({ pressRelease, onSuccess, childr
     setIsLoading(true)
 
     try {
-      await updatePressRelease(pressRelease.id, formData)
+      await updatePressReleaseAction(pressRelease.id, formData)
       setOpen(false)
       onSuccess()
     } catch (err) {

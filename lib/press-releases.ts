@@ -1,17 +1,9 @@
-// Re-export all functions from the Supabase implementation
+// Re-export read functions from the Supabase implementation.
+// All mutating operations live in app/admin/dashboard/actions.ts (admin
+// server actions) or /api/press-release/submit (public submission endpoint).
 export {
-  createPressRelease,
-  createDraftPressRelease,
   getPressReleases,
-  getPressReleaseById,
   getPressReleaseBySlug,
   getFeaturedPressReleases,
   getRecentPressReleases,
-  getDraftPressReleases,
-  getRejectedPressReleases,
-  approvePressRelease,
-  rejectPressRelease,
-  restorePressReleaseToDraft,
-  updatePressRelease,
-  deletePressRelease,
 } from "./press-releases-supabase"

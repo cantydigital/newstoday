@@ -5,7 +5,6 @@ import type React from "react"
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { supabase } from "@/lib/supabase"
 import { Upload, X, Image as ImageIcon } from "lucide-react"
 
 interface ImageUploadProps {
@@ -47,29 +46,19 @@ export default function ImageUpload({
     setIsUploading(true)
 
     try {
-      // Create unique filename
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `press-releases/${fileName}`
+      // Upload through the server endpoint, which re-validates the file
+      // (size + magic-byte MIME) and uploads with the service-role key.
+      const body = new FormData()
+      body.append("file", file)
 
-      // Upload to Supabase Storage
-      const { data, error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
+      const res = await fetch("/api/upload", { method: "POST", body })
+      const result = await res.json().catch(() => ({}))
 
-      if (uploadError) {
-        throw uploadError
+      if (!res.ok || !result?.url) {
+        throw new Error(result?.error || "Failed to upload image")
       }
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(filePath)
-
-      onChange(publicUrl)
+      onChange(result.url)
     } catch (err: any) {
       console.error('Upload error:', err)
       setError(err.message || "Failed to upload image")
@@ -79,22 +68,8 @@ export default function ImageUpload({
   }
 
   const handleRemove = async () => {
-    if (value) {
-      try {
-        // Extract file path from URL for deletion
-        const url = new URL(value)
-        const pathParts = url.pathname.split('/')
-        const filePath = pathParts.slice(-2).join('/') // Get 'press-releases/filename'
-        
-        // Delete from Supabase Storage
-        await supabase.storage
-          .from('images')
-          .remove([filePath])
-      } catch (err) {
-        console.error('Error deleting image:', err)
-        // Continue with removal even if delete fails
-      }
-    }
+    // Just clear the reference; storage cleanup of orphaned files is handled
+    // server-side and direct anon deletes are no longer permitted.
     onChange(null)
   }
 

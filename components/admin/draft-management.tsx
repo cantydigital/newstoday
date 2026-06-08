@@ -9,8 +9,11 @@ import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { getDraftPressReleases, rejectPressRelease } from "@/lib/press-releases"
-import { approveAndNotifyAction } from "@/app/admin/dashboard/actions"
+import {
+  approveAndNotifyAction,
+  rejectPressReleaseAction,
+  fetchDraftPressReleases,
+} from "@/app/admin/dashboard/actions"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
 import { CheckCircle2, XCircle, Eye, Calendar, User, Building, MailCheck, MailX, CreditCard, AlertCircle } from "lucide-react"
@@ -25,7 +28,7 @@ export default function DraftManagement() {
 
   const loadDrafts = async () => {
     try {
-      const draftReleases = await getDraftPressReleases()
+      const draftReleases = await fetchDraftPressReleases()
       setDrafts(draftReleases)
     } catch (error) {
       console.error("Error loading drafts:", error)
@@ -74,7 +77,7 @@ export default function DraftManagement() {
   const handleReject = async (id: string) => {
     setProcessingId(id)
     try {
-      await rejectPressRelease(id, rejectionReason)
+      await rejectPressReleaseAction(id, rejectionReason)
       setRejectionReason("")
       setRejectingId(null)
       await loadDrafts() // Reload the list

@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import ImageUpload from "@/components/ui/image-upload"
-import { createPressRelease } from "@/lib/press-releases"
+import { createPressReleaseAction } from "@/app/admin/dashboard/actions"
 import type { PressReleaseFormData } from "@/types/press-release"
 
 const categories = [
@@ -63,7 +63,7 @@ export default function PressReleaseForm() {
     setIsLoading(true)
 
     try {
-      await createPressRelease(formData)
+      await createPressReleaseAction(formData)
       setSuccess(true)
       // Reset form
       setFormData({

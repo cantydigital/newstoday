@@ -1,87 +1,12 @@
 import { supabase } from "./supabase"
-import { generateUniqueSlug } from "./slug-utils"
-import type { PressRelease, PressReleaseFormData, PressReleaseStatus } from "@/types/press-release"
+import type { PressRelease } from "@/types/press-release"
 
 const TABLE_NAME = "press_releases"
 
-// Helper function to get existing slugs for uniqueness check
-async function getExistingSlugs(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select('slug')
-  
-  if (error) {
-    console.error("Error fetching existing slugs:", error)
-    return []
-  }
-  
-  return data.map(row => row.slug).filter(Boolean)
-}
-
-export async function createPressRelease(data: PressReleaseFormData): Promise<string> {
-  // Generate unique slug
-  const existingSlugs = await getExistingSlugs()
-  const slug = generateUniqueSlug(data.title, existingSlugs)
-
-  const { data: result, error } = await supabase
-    .from(TABLE_NAME)
-    .insert({
-      title: data.title,
-      slug: slug,
-      subtitle: data.subtitle,
-      content: data.content,
-      category: data.category,
-      author: data.author,
-      company: data.company,
-      contact_email: data.contactEmail,
-      contact_phone: data.contactPhone,
-      featured: data.featured || false,
-      image_url: data.imageUrl,
-      status: "published" as PressReleaseStatus,
-      published_at: new Date().toISOString(),
-    })
-    .select('id')
-    .single()
-
-  if (error) {
-    console.error("Error creating press release:", error)
-    throw new Error(`Failed to create press release: ${error.message}`)
-  }
-
-  return result.id
-}
-
-export async function createDraftPressRelease(data: PressReleaseFormData): Promise<string> {
-  // Generate unique slug
-  const existingSlugs = await getExistingSlugs()
-  const slug = generateUniqueSlug(data.title, existingSlugs)
-
-  const { data: result, error } = await supabase
-    .from(TABLE_NAME)
-    .insert({
-      title: data.title,
-      slug: slug,
-      subtitle: data.subtitle,
-      content: data.content,
-      category: data.category,
-      author: data.author,
-      company: data.company,
-      contact_email: data.contactEmail,
-      contact_phone: data.contactPhone,
-      featured: data.featured || false,
-      image_url: data.imageUrl,
-      status: "draft" as PressReleaseStatus,
-    })
-    .select('id')
-    .single()
-
-  if (error) {
-    console.error("Error creating draft press release:", error)
-    throw new Error(`Failed to create draft press release: ${error.message}`)
-  }
-
-  return result.id
-}
+// NOTE: Creating press releases is handled server-side. Public submissions go
+// through /api/press-release/submit and admin-created releases go through
+// createPressReleaseAction in app/admin/dashboard/actions.ts. Both use the
+// service-role client, never the public anon client below.
 
 export async function getPressReleases(limitCount = 50): Promise<PressRelease[]> {
   const { data, error } = await supabase
@@ -97,21 +22,6 @@ export async function getPressReleases(limitCount = 50): Promise<PressRelease[]>
   }
 
   return data.map(transformSupabaseToPressRelease)
-}
-
-export async function getPressReleaseById(id: string): Promise<PressRelease | null> {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select('*')
-    .eq('id', id)
-    .single()
-
-  if (error) {
-    console.error("Error fetching press release by ID:", error)
-    return null
-  }
-
-  return transformSupabaseToPressRelease(data)
 }
 
 export async function getPressReleaseBySlug(slug: string): Promise<PressRelease | null> {
@@ -173,115 +83,11 @@ export async function getRecentPressReleases(excludeSlug?: string, limitCount = 
   return releases
 }
 
-export async function getDraftPressReleases(): Promise<PressRelease[]> {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select('*')
-    .eq('status', 'draft')
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error("Error fetching draft press releases:", error)
-    return []
-  }
-
-  return data.map(transformSupabaseToPressRelease)
-}
-
-export async function getRejectedPressReleases(): Promise<PressRelease[]> {
-  const { data, error } = await supabase
-    .from(TABLE_NAME)
-    .select('*')
-    .eq('status', 'rejected')
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error("Error fetching rejected press releases:", error)
-    return []
-  }
-
-  return data.map(transformSupabaseToPressRelease)
-}
-
-export async function restorePressReleaseToDraft(id: string): Promise<void> {
-  const { error } = await supabase
-    .from(TABLE_NAME)
-    .update({
-      status: "draft" as PressReleaseStatus,
-      rejection_reason: null,
-    })
-    .eq('id', id)
-
-  if (error) {
-    console.error("Error restoring press release to draft:", error)
-    throw new Error(`Failed to restore press release: ${error.message}`)
-  }
-}
-
-export async function approvePressRelease(id: string): Promise<void> {
-  const { error } = await supabase
-    .from(TABLE_NAME)
-    .update({
-      status: "published" as PressReleaseStatus,
-      published_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-
-  if (error) {
-    console.error("Error approving press release:", error)
-    throw new Error(`Failed to approve press release: ${error.message}`)
-  }
-}
-
-export async function rejectPressRelease(id: string, reason?: string): Promise<void> {
-  const { error } = await supabase
-    .from(TABLE_NAME)
-    .update({
-      status: "rejected" as PressReleaseStatus,
-      rejection_reason: reason || "Not approved for publication",
-    })
-    .eq('id', id)
-
-  if (error) {
-    console.error("Error rejecting press release:", error)
-    throw new Error(`Failed to reject press release: ${error.message}`)
-  }
-}
-
-export async function updatePressRelease(id: string, data: PressReleaseFormData): Promise<void> {
-  const { error } = await supabase
-    .from(TABLE_NAME)
-    .update({
-      title: data.title,
-      subtitle: data.subtitle,
-      content: data.content,
-      category: data.category,
-      author: data.author,
-      company: data.company,
-      contact_email: data.contactEmail,
-      contact_phone: data.contactPhone,
-      featured: data.featured || false,
-      image_url: data.imageUrl,
-    })
-    .eq('id', id)
-
-  if (error) {
-    console.error("Error updating press release:", error)
-    throw new Error(`Failed to update press release: ${error.message}`)
-  }
-}
-
-export async function deletePressRelease(id: string): Promise<void> {
-  const { error } = await supabase
-    .from(TABLE_NAME)
-    .delete()
-    .eq('id', id)
-
-  if (error) {
-    console.error("Error deleting press release:", error)
-    throw new Error(`Failed to delete press release: ${error.message}`)
-  }
-}
+// NOTE: Admin reads (by id, drafts, rejected) and all mutating operations (create/approve/reject/restore/update/delete)
+// have been moved to admin-only "use server" actions in
+// app/admin/dashboard/actions.ts. Those run server-side with the service-role
+// client behind requireAdmin(), so they are never exposed to the browser via
+// the public anon key. Do NOT re-add mutation helpers here.
 
 // Helper function to transform Supabase row to PressRelease interface
 function transformSupabaseToPressRelease(row: any): PressRelease {

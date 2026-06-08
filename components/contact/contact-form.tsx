@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Send, CheckCircle, AlertCircle } from "lucide-react"
-import { submitContactForm } from "@/lib/contact-submissions"
+import { getRecaptchaToken } from "@/lib/recaptcha-client"
 
 const inquiryTypes = [
   "Press Release Submission",
@@ -44,14 +44,25 @@ export default function ContactForm() {
     setError("")
 
     try {
-      await submitContactForm({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || undefined,
-        subject: formData.subject,
-        message: formData.message
+      const recaptchaToken = await getRecaptchaToken("contact")
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          subject: formData.subject,
+          message: formData.message,
+          recaptchaToken,
+        }),
       })
-      
+
+      const result = await res.json().catch(() => ({}))
+      if (!res.ok || !result?.success) {
+        throw new Error(result?.error || "Failed to send message")
+      }
+
       setIsSubmitted(true)
 
       // Reset form after 3 seconds

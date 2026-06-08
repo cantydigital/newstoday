@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from '@/lib/utils'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 interface HtmlContentProps {
   content: string
@@ -24,7 +25,7 @@ export default function HtmlContent({ content, className }: HtmlContentProps) {
         "[&>*]:mb-4 [&>*:last-child]:mb-0",
         className
       )}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
     />
   )
 }

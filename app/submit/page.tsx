@@ -16,6 +16,7 @@ import { ArrowLeft, CheckCircle2, Clock } from "lucide-react"
 import Link from "next/link"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
+import { getRecaptchaToken } from "@/lib/recaptcha-client"
 
 const categories = [
   "Business",
@@ -67,10 +68,11 @@ export default function SubmitPressReleasePage() {
     setIsLoading(true)
 
     try {
+      const recaptchaToken = await getRecaptchaToken("submit_press_release")
       const response = await fetch("/api/press-release/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, recaptchaToken }),
       })
 
       const result = await response.json().catch(() => ({}))

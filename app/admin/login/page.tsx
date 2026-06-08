@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { login } from "@/lib/auth"
 import Header from "@/components/layout/header"
 import Footer from "@/components/layout/footer"
+import { getRecaptchaToken } from "@/lib/recaptcha-client"
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -26,7 +27,8 @@ export default function AdminLoginPage() {
     setIsLoading(true)
 
     try {
-      const result = await login(username, password)
+      const recaptchaToken = await getRecaptchaToken("admin_login")
+      const result = await login(username, password, recaptchaToken)
       if (result.success) {
         router.push("/admin/dashboard")
         router.refresh()

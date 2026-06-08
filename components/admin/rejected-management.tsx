@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import {
-  getRejectedPressReleases,
-  restorePressReleaseToDraft,
-  deletePressRelease,
-} from "@/lib/press-releases"
+  restorePressReleaseToDraftAction,
+  deletePressReleaseAction,
+  fetchRejectedPressReleases,
+} from "@/app/admin/dashboard/actions"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
 import {
@@ -33,7 +33,7 @@ export default function RejectedManagement() {
 
   const loadRejected = async () => {
     try {
-      const rejectedReleases = await getRejectedPressReleases()
+      const rejectedReleases = await fetchRejectedPressReleases()
       setRejected(rejectedReleases)
     } catch (error) {
       console.error("Error loading rejected press releases:", error)
@@ -49,7 +49,7 @@ export default function RejectedManagement() {
   const handleRestore = async (id: string) => {
     setProcessingId(id)
     try {
-      await restorePressReleaseToDraft(id)
+      await restorePressReleaseToDraftAction(id)
       await loadRejected()
     } catch (error) {
       console.error("Error restoring press release:", error)
@@ -61,7 +61,7 @@ export default function RejectedManagement() {
   const handleDelete = async (id: string) => {
     setProcessingId(id)
     try {
-      await deletePressRelease(id)
+      await deletePressReleaseAction(id)
       setConfirmDeleteId(null)
       await loadRejected()
     } catch (error) {

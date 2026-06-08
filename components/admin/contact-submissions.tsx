@@ -17,13 +17,13 @@ import {
   Search
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { 
-  getContactSubmissions, 
-  markContactSubmissionAsRead, 
-  markContactSubmissionAsResponded,
-  updateContactSubmissionNotes,
-  type ContactSubmission 
-} from "@/lib/contact-submissions"
+import type { ContactSubmission } from "@/lib/contact-submissions"
+import {
+  fetchContactSubmissions,
+  markContactReadAction,
+  markContactRespondedAction,
+  updateContactNotesAction,
+} from "@/app/admin/dashboard/actions"
 import {
   Dialog,
   DialogContent,
@@ -47,7 +47,7 @@ export default function ContactSubmissions() {
 
   const loadSubmissions = async () => {
     try {
-      const data = await getContactSubmissions()
+      const data = await fetchContactSubmissions()
       setSubmissions(data)
     } catch (error) {
       console.error("Error loading contact submissions:", error)
@@ -58,7 +58,7 @@ export default function ContactSubmissions() {
 
   const handleMarkAsRead = async (id: string) => {
     try {
-      await markContactSubmissionAsRead(id)
+      await markContactReadAction(id)
       await loadSubmissions()
     } catch (error) {
       console.error("Error marking as read:", error)
@@ -68,7 +68,7 @@ export default function ContactSubmissions() {
   const handleMarkAsResponded = async (id: string) => {
     try {
       setIsUpdating(true)
-      await markContactSubmissionAsResponded(id, adminNotes)
+      await markContactRespondedAction(id, adminNotes)
       await loadSubmissions()
       setSelectedSubmission(null)
       setAdminNotes("")
@@ -82,7 +82,7 @@ export default function ContactSubmissions() {
   const handleUpdateNotes = async (id: string) => {
     try {
       setIsUpdating(true)
-      await updateContactSubmissionNotes(id, adminNotes)
+      await updateContactNotesAction(id, adminNotes)
       await loadSubmissions()
       setSelectedSubmission(null)
       setAdminNotes("")

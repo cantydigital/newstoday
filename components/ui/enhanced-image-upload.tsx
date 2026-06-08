@@ -5,7 +5,6 @@ import type React from "react"
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { supabase } from "@/lib/supabase"
 import { Upload, X, Image as ImageIcon, AlertCircle } from "lucide-react"
 
 interface ImageUploadProps {
@@ -48,50 +47,22 @@ export default function EnhancedImageUpload({
     setIsUploading(true)
 
     try {
-      // Create unique filename with timestamp and random string
-      const fileExt = file.name.split('.').pop()?.toLowerCase()
-      const timestamp = Date.now()
-      const randomStr = Math.random().toString(36).substring(2, 8)
-      const fileName = `${timestamp}-${randomStr}.${fileExt}`
-      const filePath = `press-releases/${fileName}`
+      // Upload through the server endpoint, which re-validates the file
+      // (size + magic-byte MIME) and uploads with the service-role key.
+      const body = new FormData()
+      body.append("file", file)
 
-      console.log('Uploading file:', fileName, 'Size:', file.size, 'Type:', file.type)
+      const res = await fetch("/api/upload", { method: "POST", body })
+      const result = await res.json().catch(() => ({}))
 
-      // Try to upload to Supabase Storage with additional options
-      const { data, error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-          duplex: 'half' // Add this for better compatibility
-        })
-
-      if (uploadError) {
-        console.error('Upload error details:', uploadError)
-        throw new Error(`Upload failed: ${uploadError.message}`)
+      if (!res.ok || !result?.url) {
+        throw new Error(result?.error || "Failed to upload image. Please try again.")
       }
 
-      console.log('Upload successful:', data)
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(filePath)
-
-      console.log('Public URL generated:', publicUrl)
-
-      onChange(publicUrl)
+      onChange(result.url)
     } catch (err: any) {
       console.error('Upload error:', err)
-      
-      // Provide more specific error messages
-      if (err.message?.includes('row-level security')) {
-        setError("Storage access denied. Please check your database permissions.")
-      } else if (err.message?.includes('bucket')) {
-        setError("Storage bucket not found. Please check your storage configuration.")
-      } else {
-        setError(err.message || "Failed to upload image. Please try again.")
-      }
+      setError(err.message || "Failed to upload image. Please try again.")
     } finally {
       setIsUploading(false)
       // Clear the file input
@@ -102,29 +73,8 @@ export default function EnhancedImageUpload({
   }
 
   const handleRemove = async () => {
-    if (value) {
-      try {
-        // Extract file path from URL for deletion
-        const url = new URL(value)
-        const pathParts = url.pathname.split('/')
-        const filePath = pathParts.slice(-2).join('/') // Get 'press-releases/filename'
-        
-        console.log('Deleting file:', filePath)
-        
-        // Delete from Supabase Storage
-        const { error: deleteError } = await supabase.storage
-          .from('images')
-          .remove([filePath])
-          
-        if (deleteError) {
-          console.error('Delete error:', deleteError)
-          // Continue with removal even if delete fails
-        }
-      } catch (err) {
-        console.error('Error deleting image:', err)
-        // Continue with removal even if delete fails
-      }
-    }
+    // Just clear the reference; direct anon storage deletes are no longer
+    // permitted and orphan cleanup is handled server-side.
     onChange(null)
   }
 
