@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+// Short-lived cache so repeated requests within the same session window don't
+// each trigger a Supabase round-trip. TTL matches the server-action cache.
+const SESSION_CACHE_TTL_MS = 60_000
+const sessionCache = new Map<string, { valid: boolean; cachedAt: number }>()
+
 /**
  * Validate an admin session token by looking it up server-side in the
  * `admin_sessions` table (via the Supabase REST API). Access is NEVER granted
@@ -9,6 +14,11 @@ import type { NextRequest } from "next/server"
  */
 async function isValidAdminSession(token: string | undefined): Promise<boolean> {
   if (!token) return false
+
+  const cached = sessionCache.get(token)
+  if (cached && Date.now() - cached.cachedAt < SESSION_CACHE_TTL_MS) {
+    return cached.valid
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -34,9 +44,14 @@ async function isValidAdminSession(token: string | undefined): Promise<boolean> 
 
     const rows = (await res.json()) as { expires_at: string }[]
     const row = rows?.[0]
-    if (!row) return false
+    if (!row) {
+      sessionCache.set(token, { valid: false, cachedAt: Date.now() })
+      return false
+    }
 
-    return new Date(row.expires_at).getTime() > Date.now()
+    const valid = new Date(row.expires_at).getTime() > Date.now()
+    sessionCache.set(token, { valid, cachedAt: Date.now() })
+    return valid
   } catch (err) {
     console.error("[middleware] session validation failed", err)
     return false

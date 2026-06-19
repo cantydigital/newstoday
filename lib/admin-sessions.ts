@@ -1,5 +1,10 @@
 import { assertSupabaseAdmin } from "./supabase-admin"
 
+// Short-lived in-memory cache: avoids a DB round-trip on every server action
+// when the same token is reused within 60 seconds. Logout clears the entry.
+const SESSION_CACHE_TTL_MS = 60_000
+const sessionCache = new Map<string, { valid: boolean; cachedAt: number }>()
+
 /**
  * Server-side admin session store.
  *
@@ -40,6 +45,11 @@ export async function validateAdminSession(
 ): Promise<boolean> {
   if (!token) return false
 
+  const cached = sessionCache.get(token)
+  if (cached && Date.now() - cached.cachedAt < SESSION_CACHE_TTL_MS) {
+    return cached.valid
+  }
+
   const supabase = assertSupabaseAdmin()
 
   const { data, error } = await supabase
@@ -48,14 +58,19 @@ export async function validateAdminSession(
     .eq("token", token)
     .maybeSingle()
 
-  if (error || !data) return false
+  if (error || !data) {
+    sessionCache.set(token, { valid: false, cachedAt: Date.now() })
+    return false
+  }
 
   const expired = new Date(data.expires_at).getTime() <= Date.now()
   if (expired) {
+    sessionCache.delete(token)
     await supabase.from(TABLE_NAME).delete().eq("token", token)
     return false
   }
 
+  sessionCache.set(token, { valid: true, cachedAt: Date.now() })
   return true
 }
 
@@ -64,6 +79,7 @@ export async function deleteAdminSession(
   token: string | undefined | null
 ): Promise<void> {
   if (!token) return
+  sessionCache.delete(token)
   const supabase = assertSupabaseAdmin()
   await supabase.from(TABLE_NAME).delete().eq("token", token)
 }
