@@ -9,7 +9,7 @@ import {
   type PrUser,
 } from "@/lib/credits"
 import { assertSupabaseAdmin } from "@/lib/supabase-admin"
-import { sendPressReleasePublishedEmail } from "@/lib/email"
+import { sendPressReleasePublishedEmail, sendPressReleaseRejectedEmail } from "@/lib/email"
 import { sanitizeHtml, validateImageUrl } from "@/lib/sanitize"
 import { generateUniqueSlug } from "@/lib/slug-utils"
 import type { PressRelease, PressReleaseFormData } from "@/types/press-release"
@@ -142,23 +142,38 @@ export async function approveAndNotifyAction(
   return { ...emailResult, liveUrl }
 }
 
-/** Reject a press release with an optional reason. Admin only. */
+/** Reject a press release with an optional reason and notify the author. Admin only. */
 export async function rejectPressReleaseAction(
   id: string,
   reason?: string
-): Promise<void> {
+): Promise<{ sent: boolean; reason?: string }> {
   await requireAdmin()
   const supabase = assertSupabaseAdmin()
 
-  const { error } = await supabase
+  const rejectionReason = reason?.trim() || "Not approved for publication"
+
+  const { data, error } = await supabase
     .from("press_releases")
     .update({
       status: "rejected",
-      rejection_reason: reason?.trim() || "Not approved for publication",
+      rejection_reason: rejectionReason,
     })
     .eq("id", id)
+    .select("title, author, contact_email, purchase_email")
+    .single()
 
-  if (error) throw new Error(`Failed to reject press release: ${error.message}`)
+  if (error || !data) {
+    throw new Error(`Failed to reject press release: ${error?.message ?? "not found"}`)
+  }
+
+  const emailResult = await sendPressReleaseRejectedEmail({
+    to: data.purchase_email ?? data.contact_email,
+    authorName: data.author,
+    pressReleaseTitle: data.title,
+    rejectionReason,
+  })
+
+  return emailResult
 }
 
 /** Restore a rejected press release back to draft. Admin only. */

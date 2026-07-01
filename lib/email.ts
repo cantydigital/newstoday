@@ -95,6 +95,93 @@ export async function sendPressReleasePublishedEmail(
   }
 }
 
+export type PressReleaseRejectedEmail = {
+  to: string | string[]
+  authorName: string
+  pressReleaseTitle: string
+  rejectionReason?: string
+}
+
+/**
+ * Notify the press release author that their submission was not approved.
+ * Silently no-ops (with a console.warn) if RESEND_API_KEY isn't set.
+ */
+export async function sendPressReleaseRejectedEmail(
+  params: PressReleaseRejectedEmail
+): Promise<{ sent: boolean; reason?: string }> {
+  if (!resend) {
+    console.warn(
+      "[email] RESEND_API_KEY not configured -- skipping rejection notification"
+    )
+    return { sent: false, reason: "resend_not_configured" }
+  }
+
+  const { to, authorName, pressReleaseTitle, rejectionReason } = params
+
+  const subject = `Update on your press release submission — News Today`
+
+  const reasonHtml = rejectionReason
+    ? `<p style="font-size: 15px; line-height: 1.55; margin: 0 0 12px;">
+        <strong>Reason:</strong> ${escapeHtml(rejectionReason)}
+       </p>`
+    : ""
+
+  const reasonText = rejectionReason ? `\nReason: ${rejectionReason}\n` : ""
+
+  const html = `
+    <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #111;">
+      <h1 style="font-size: 22px; margin: 0 0 16px;">Your press release was not approved</h1>
+      <p style="font-size: 15px; line-height: 1.55; margin: 0 0 12px;">
+        Hi ${escapeHtml(authorName || "there")},
+      </p>
+      <p style="font-size: 15px; line-height: 1.55; margin: 0 0 12px;">
+        Thank you for submitting your press release <strong>"${escapeHtml(
+          pressReleaseTitle
+        )}"</strong> to News Today. Unfortunately, after review by our editorial team, we are unable to publish it at this time.
+      </p>
+      ${reasonHtml}
+      <p style="font-size: 15px; line-height: 1.55; margin: 0 0 12px;">
+        If you have any questions or would like to resubmit with amendments, please reply to this email and our team will be happy to assist.
+      </p>
+      <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
+      <p style="font-size: 12px; line-height: 1.5; color: #888;">
+        News Today — Australian news, every day.<br />
+        If you have any questions, just reply to this email.
+      </p>
+    </div>
+  `
+
+  const text = [
+    `Hi ${authorName || "there"},`,
+    "",
+    `Thank you for submitting your press release "${pressReleaseTitle}" to News Today. Unfortunately, after review by our editorial team, we are unable to publish it at this time.`,
+    reasonText,
+    "If you have any questions or would like to resubmit with amendments, please reply to this email.",
+    "",
+    "— News Today",
+  ].join("\n")
+
+  try {
+    const result = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject,
+      html,
+      text,
+    })
+
+    if (result.error) {
+      console.error("[email] resend send failed", result.error)
+      return { sent: false, reason: result.error.message }
+    }
+
+    return { sent: true }
+  } catch (err) {
+    console.error("[email] resend send threw", err)
+    return { sent: false, reason: (err as Error).message }
+  }
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")

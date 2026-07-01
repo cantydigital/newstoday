@@ -16,6 +16,9 @@ ALTER TABLE press_releases
 ALTER TABLE press_releases
   ADD COLUMN IF NOT EXISTS published_url TEXT;
 
+ALTER TABLE press_releases
+  ADD COLUMN IF NOT EXISTS purchase_email TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_press_releases_payment_received
   ON press_releases(payment_received);
 
