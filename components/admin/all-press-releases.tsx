@@ -14,7 +14,6 @@ import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
 import { Search, Eye, Calendar, User, Building, Edit, Trash2 } from "lucide-react"
 import { truncateHtml } from "@/lib/html-utils"
-import EditPressReleaseDialog from "./edit-press-release-form"
 import {
   Pagination,
   PaginationContent,
@@ -85,10 +84,6 @@ export default function AllPressReleases() {
     if (safePage < totalPages - 2) pages.push("ellipsis")
     pages.push(totalPages)
     return pages
-  }
-
-  const handleEditSuccess = () => {
-    loadReleases() // Reload the releases to show updated data
   }
 
   const handleDelete = async (id: string, title: string) => {
@@ -202,15 +197,12 @@ export default function AllPressReleases() {
                         View
                       </Link>
                     </Button>
-                    <EditPressReleaseDialog
-                      pressRelease={release}
-                      onSuccess={handleEditSuccess}
-                    >
-                      <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/admin/edit/${release.id}`}>
                         <Edit className="h-4 w-4 mr-1" />
                         Edit
-                      </Button>
-                    </EditPressReleaseDialog>
+                      </Link>
+                    </Button>
                     <Button 
                       variant="outline" 
                       size="sm" 

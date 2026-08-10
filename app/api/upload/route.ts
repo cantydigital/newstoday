@@ -4,7 +4,7 @@ import { assertSupabaseAdmin } from "@/lib/supabase-admin"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-const MAX_BYTES = 5 * 1024 * 1024 // 5MB
+const MAX_BYTES = 300 * 1024 // 300KB
 const BUCKET = "images"
 
 // Allowed image types mapped to their canonical extension.
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   }
   if (file.size > MAX_BYTES) {
     return NextResponse.json(
-      { error: "Image must be smaller than 5MB" },
+      { error: "Image must be smaller than 300KB" },
       { status: 400 }
     )
   }
