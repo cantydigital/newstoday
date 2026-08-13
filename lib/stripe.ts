@@ -30,9 +30,9 @@ export function assertStripe(): Stripe {
  */
 export const PAYMENT_LINK_CREDITS: Record<string, number> = {
   // Single press release — $39
-  "4gMcN5fhpaxPgBWbQzao80U": 1,
+  "fZudR9dWw7PG4LObVm5sA03": 1,
   // Bundle of 10 — $300
-  "14A14n8T121j1H24o7ao80V": 10,
+  "14A5kD8Cc0nea68f7y5sA04": 10,
 }
 
 /**
