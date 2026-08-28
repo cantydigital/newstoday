@@ -213,10 +213,10 @@ export async function sendNewPaidPressReleaseNotification(
         A new paid press release has been submitted and is waiting for review.
       </p>
       <ul style="font-size: 15px; line-height: 1.55; margin: 0 0 12px;">
-        <li><strong>Title:</strong> \${escapeHtml(pressReleaseTitle)}</li>
-        <li><strong>Author:</strong> \${escapeHtml(authorName || "N/A")}</li>
-        <li><strong>Company:</strong> \${escapeHtml(company || "N/A")}</li>
-        <li><strong>Purchaser Email:</strong> \${escapeHtml(creditEmail || "N/A")}</li>
+        <li><strong>Title:</strong> ${escapeHtml(pressReleaseTitle)}</li>
+        <li><strong>Author:</strong> ${escapeHtml(authorName || "N/A")}</li>
+        <li><strong>Company:</strong> ${escapeHtml(company || "N/A")}</li>
+        <li><strong>Purchaser Email:</strong> ${escapeHtml(creditEmail || "N/A")}</li>
       </ul>
     </div>
   `
@@ -224,11 +224,11 @@ export async function sendNewPaidPressReleaseNotification(
   const text = [
     "New Paid Press Release Submission",
     "",
-    \`Title: \${pressReleaseTitle}\`,
-    \`Author: \${authorName || "N/A"}\`,
-    \`Company: \${company || "N/A"}\`,
-    \`Purchaser Email: \${creditEmail || "N/A"}\`,
-  ].join("\\n")
+    `Title: ${pressReleaseTitle}`,
+    `Author: ${authorName || "N/A"}`,
+    `Company: ${company || "N/A"}`,
+    `Purchaser Email: ${creditEmail || "N/A"}`,
+  ].join("\n")
 
   try {
     const result = await resend.emails.send({
