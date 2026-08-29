@@ -4,7 +4,7 @@ import { consumeOneCredit } from "@/lib/credits"
 import { generateUniqueSlug } from "@/lib/slug-utils"
 import { sanitizeHtml, validateImageUrl } from "@/lib/sanitize"
 import { verifyRecaptcha } from "@/lib/recaptcha"
-import { sendNewPaidPressReleaseNotification } from "@/lib/email"
+import { sendNewPressReleaseNotification } from "@/lib/email"
 import type { PressReleaseFormData } from "@/types/press-release"
 
 export const runtime = "nodejs"
@@ -134,15 +134,16 @@ export async function POST(req: NextRequest) {
         "[press-release/submit] failed to mark payment_received",
         updateErr
       )
-    } else {
-      await sendNewPaidPressReleaseNotification({
-        pressReleaseTitle: body.title,
-        authorName: body.author,
-        company: body.company,
-        creditEmail,
-      })
     }
   }
+
+  await sendNewPressReleaseNotification({
+    pressReleaseTitle: body.title,
+    authorName: body.author,
+    company: body.company,
+    creditEmail,
+    isPaid: paid,
+  })
 
   return NextResponse.json({
     success: true,
