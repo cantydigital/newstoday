@@ -17,7 +17,7 @@ const industries = [
 
 export default function IndustriesSection() {
   return (
-    <section id="industries" className="py-20 md:py-28 bg-muted/30">
+    <section id="industries" className="py-20 md:py-28 bg-muted/30 border-y border-border/40">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4 text-balance">
@@ -30,7 +30,7 @@ export default function IndustriesSection() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
           {industries.map((industry) => (
-            <div key={industry} className="flex items-center gap-2 p-3 rounded-lg bg-background border border-border">
+            <div key={industry} className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border shadow-xs">
               <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
               <span className="text-sm text-foreground">{industry}</span>
             </div>

@@ -17,7 +17,7 @@ export default function RecentPressReleases({ releases }: RecentPressReleasesPro
   }
 
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-20 md:py-28 bg-muted/30 border-y border-border/40">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4 text-balance">

@@ -55,11 +55,6 @@ export default function Footer() {
                   Contact
                 </Link>
               </li>
-              <li>
-                <Link href="/admin/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Admin Login
-                </Link>
-              </li>
             </ul>
           </div>
 

@@ -12,7 +12,8 @@ import { getPressReleases } from "@/lib/press-releases"
 import { deletePressReleaseAction } from "@/app/admin/dashboard/actions"
 import type { PressRelease } from "@/types/press-release"
 import { format } from "date-fns"
-import { Search, Eye, Calendar, User, Building, Edit, Trash2 } from "lucide-react"
+import { Search, Eye, Calendar, User, Building, Edit, Trash2, Loader2 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { truncateHtml } from "@/lib/html-utils"
 import {
   Pagination,
@@ -106,13 +107,35 @@ export default function AllPressReleases() {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>All Press Releases</CardTitle>
-          <CardDescription>Loading published press releases...</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div>
+            <CardTitle>All Press Releases</CardTitle>
+            <CardDescription>Loading published press releases...</CardDescription>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/60 px-3 py-1 rounded-full border border-border/50">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+            <span>Fetching releases...</span>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <CardContent className="space-y-4">
+          <div className="mb-6">
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-4 rounded-lg border border-border space-y-3">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-5 w-1/3" />
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex gap-4 pt-1">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-3.5 w-28" />
+                  <Skeleton className="h-3.5 w-20" />
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

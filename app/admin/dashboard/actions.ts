@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { isAuthenticated } from "@/lib/auth"
 import {
   adminAdjustCredits,
@@ -139,6 +140,10 @@ export async function approveAndNotifyAction(
     liveUrl,
   })
 
+  revalidatePath("/releases")
+  revalidatePath("/")
+  revalidatePath(`/releases/${data.slug}`)
+
   return { ...emailResult, liveUrl }
 }
 
@@ -173,6 +178,9 @@ export async function rejectPressReleaseAction(
     rejectionReason,
   })
 
+  revalidatePath("/releases")
+  revalidatePath("/")
+
   return emailResult
 }
 
@@ -189,6 +197,9 @@ export async function restorePressReleaseToDraftAction(
     .eq("id", id)
 
   if (error) throw new Error(`Failed to restore press release: ${error.message}`)
+
+  revalidatePath("/releases")
+  revalidatePath("/")
 }
 
 /** Permanently delete a press release. Admin only. */
@@ -199,6 +210,9 @@ export async function deletePressReleaseAction(id: string): Promise<void> {
   const { error } = await supabase.from("press_releases").delete().eq("id", id)
 
   if (error) throw new Error(`Failed to delete press release: ${error.message}`)
+
+  revalidatePath("/releases")
+  revalidatePath("/")
 }
 
 /**
@@ -233,6 +247,9 @@ export async function updatePressReleaseAction(
     .eq("id", id)
 
   if (error) throw new Error(`Failed to update press release: ${error.message}`)
+
+  revalidatePath("/releases")
+  revalidatePath("/")
 }
 
 /**
@@ -279,6 +296,9 @@ export async function createPressReleaseAction(
   if (error || !inserted) {
     throw new Error(`Failed to create press release: ${error?.message ?? "unknown"}`)
   }
+
+  revalidatePath("/releases")
+  revalidatePath("/")
 
   return inserted.id
 }

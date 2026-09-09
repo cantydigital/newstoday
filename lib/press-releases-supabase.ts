@@ -8,12 +8,18 @@ const TABLE_NAME = "press_releases"
 // createPressReleaseAction in app/admin/dashboard/actions.ts. Both use the
 // service-role client, never the public anon client below.
 
-export async function getPressReleases(limitCount = 50): Promise<PressRelease[]> {
+const LIST_COLUMNS =
+  "id, slug, title, subtitle, category, author, company, contact_email, contact_phone, published_at, created_at, status, featured, image_url, content"
+
+export async function getPressReleases(
+  limitCount = 100,
+  truncateContentForListing = true
+): Promise<PressRelease[]> {
   const { data, error } = await supabase
     .from(TABLE_NAME)
-    .select('*')
-    .eq('status', 'published')
-    .order('published_at', { ascending: false })
+    .select(LIST_COLUMNS)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
     .limit(limitCount)
 
   if (error) {
@@ -21,7 +27,35 @@ export async function getPressReleases(limitCount = 50): Promise<PressRelease[]>
     return []
   }
 
-  return data.map(transformSupabaseToPressRelease)
+  return data.map((row) => {
+    const item = transformSupabaseToPressRelease(row)
+    if (truncateContentForListing && item.content && item.content.length > 300) {
+      item.content = item.content.slice(0, 300)
+    }
+    return item
+  })
+}
+
+export async function getPressReleasesForSitemap(): Promise<
+  { slug: string; publishedAt?: Date; createdAt: Date }[]
+> {
+  const { data, error } = await supabase
+    .from(TABLE_NAME)
+    .select("slug, published_at, created_at")
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(1000)
+
+  if (error) {
+    console.error("Error fetching press releases for sitemap:", error)
+    return []
+  }
+
+  return data.map((row) => ({
+    slug: row.slug,
+    publishedAt: row.published_at ? new Date(row.published_at) : undefined,
+    createdAt: new Date(row.created_at),
+  }))
 }
 
 export async function getPressReleaseBySlug(slug: string): Promise<PressRelease | null> {

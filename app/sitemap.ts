@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { getPressReleases } from '@/lib/press-releases'
+import { getPressReleasesForSitemap } from '@/lib/press-releases'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://newstoday.au'
@@ -63,8 +63,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   try {
-    // Get all published press releases
-    const pressReleases = await getPressReleases(1000) // Get a large number to include all
+    // Get published press releases (lightweight query with only slug and dates)
+    const pressReleases = await getPressReleasesForSitemap()
     
     // Create sitemap entries for press releases
     const pressReleasesPages: MetadataRoute.Sitemap = pressReleases.map((release) => ({
