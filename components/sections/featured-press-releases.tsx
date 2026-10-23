@@ -17,7 +17,7 @@ export default function FeaturedPressReleases({ releases }: FeaturedPressRelease
   }
 
   return (
-    <section className="py-20 md:py-28 border-b border-border">
+    <section className="py-20 md:py-28 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <Badge variant="secondary" className="mb-4">

@@ -182,52 +182,56 @@ export async function sendPressReleaseRejectedEmail(
   }
 }
 
-export type NewPaidPressReleaseNotification = {
+export type NewPressReleaseNotification = {
   pressReleaseTitle: string
   authorName: string
   company: string
   creditEmail?: string
+  isPaid?: boolean
 }
 
 /**
- * Notify Karan when a new paid press release is submitted.
+ * Notify Karan when a new press release is submitted.
  */
-export async function sendNewPaidPressReleaseNotification(
-  params: NewPaidPressReleaseNotification
+export async function sendNewPressReleaseNotification(
+  params: NewPressReleaseNotification
 ): Promise<{ sent: boolean; reason?: string }> {
   if (!resend) {
     console.warn(
-      "[email] RESEND_API_KEY not configured -- skipping new paid press release notification"
+      "[email] RESEND_API_KEY not configured -- skipping new press release notification"
     )
     return { sent: false, reason: "resend_not_configured" }
   }
 
-  const { pressReleaseTitle, authorName, company, creditEmail } = params
-  const to = "karan@cantydigital.com"
-  const subject = `New Paid Press Release Submitted: ${pressReleaseTitle}`
+  const { pressReleaseTitle, authorName, company, creditEmail, isPaid } = params
+  const to = ["karan@cantydigital.com", "admin@cantydigital.com"]
+  const typeText = isPaid ? "Paid " : ""
+  const subject = `New ${typeText}Press Release Submitted: ${pressReleaseTitle}`
 
   const html = `
     <div style="font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; color: #111;">
-      <h1 style="font-size: 22px; margin: 0 0 16px;">New Paid Press Release Submission</h1>
+      <h1 style="font-size: 22px; margin: 0 0 16px;">New ${typeText}Press Release Submission</h1>
       <p style="font-size: 15px; line-height: 1.55; margin: 0 0 12px;">
-        A new paid press release has been submitted and is waiting for review.
+        A new ${typeText.toLowerCase()}press release has been submitted and is waiting for review.
       </p>
       <ul style="font-size: 15px; line-height: 1.55; margin: 0 0 12px;">
         <li><strong>Title:</strong> ${escapeHtml(pressReleaseTitle)}</li>
         <li><strong>Author:</strong> ${escapeHtml(authorName || "N/A")}</li>
         <li><strong>Company:</strong> ${escapeHtml(company || "N/A")}</li>
         <li><strong>Purchaser Email:</strong> ${escapeHtml(creditEmail || "N/A")}</li>
+        <li><strong>Status:</strong> ${isPaid ? "Paid" : "Draft / Unpaid"}</li>
       </ul>
     </div>
   `
 
   const text = [
-    "New Paid Press Release Submission",
+    `New ${typeText}Press Release Submission`,
     "",
     `Title: ${pressReleaseTitle}`,
     `Author: ${authorName || "N/A"}`,
     `Company: ${company || "N/A"}`,
     `Purchaser Email: ${creditEmail || "N/A"}`,
+    `Status: ${isPaid ? "Paid" : "Draft / Unpaid"}`,
   ].join("\n")
 
   try {

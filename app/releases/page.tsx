@@ -56,7 +56,18 @@ export const metadata: Metadata = {
   },
 }
 
-export default function AllPressReleasesPage() {
+import { getPressReleases } from "@/lib/press-releases"
+
+export const revalidate = 60 // Revalidate at Edge CDN every 60 seconds
+
+export default async function AllPressReleasesPage() {
+  let initialReleases: any[] = []
+  try {
+    initialReleases = await getPressReleases(100)
+  } catch (err) {
+    console.error("Failed to load initial press releases on server:", err)
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -83,7 +94,7 @@ export default function AllPressReleasesPage() {
       </section>
 
       {/* Main Content */}
-      <AllPressReleasesClient />
+      <AllPressReleasesClient initialReleases={initialReleases} />
 
       <Footer />
     </div>

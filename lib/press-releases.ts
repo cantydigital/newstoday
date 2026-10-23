@@ -3,6 +3,7 @@
 // server actions) or /api/press-release/submit (public submission endpoint).
 export {
   getPressReleases,
+  getPressReleasesForSitemap,
   getPressReleaseBySlug,
   getFeaturedPressReleases,
   getRecentPressReleases,

@@ -50,10 +50,16 @@ const categories = [
   "Other"
 ]
 
-export default function AllPressReleasesClient() {
-  const [releases, setReleases] = useState<PressRelease[]>([])
-  const [filteredReleases, setFilteredReleases] = useState<PressRelease[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+interface AllPressReleasesClientProps {
+  initialReleases?: PressRelease[]
+}
+
+export default function AllPressReleasesClient({
+  initialReleases = [],
+}: AllPressReleasesClientProps) {
+  const [releases, setReleases] = useState<PressRelease[]>(initialReleases)
+  const [filteredReleases, setFilteredReleases] = useState<PressRelease[]>(initialReleases)
+  const [isLoading, setIsLoading] = useState(initialReleases.length === 0)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All Categories")
@@ -62,7 +68,7 @@ export default function AllPressReleasesClient() {
   const loadReleases = async () => {
     try {
       setIsLoading(true)
-      const allReleases = await getPressReleases(1000) // Get a large number for client-side pagination
+      const allReleases = await getPressReleases(100)
       setReleases(allReleases)
       setFilteredReleases(allReleases)
     } catch (error) {
@@ -72,9 +78,12 @@ export default function AllPressReleasesClient() {
     }
   }
 
+  // Only fetch client-side if no initial data was provided by the server
   useEffect(() => {
-    loadReleases()
-  }, [])
+    if (initialReleases.length === 0 && releases.length === 0) {
+      loadReleases()
+    }
+  }, [initialReleases])
 
   useEffect(() => {
     let filtered = releases
@@ -294,7 +303,11 @@ export default function AllPressReleasesClient() {
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            <span>{format(release.publishedAt!, "MMM dd, yyyy")}</span>
+                            <span>
+                              {release.publishedAt
+                                ? format(new Date(release.publishedAt), "MMM dd, yyyy")
+                                : ""}
+                            </span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Building className="h-4 w-4" />

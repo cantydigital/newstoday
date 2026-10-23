@@ -39,11 +39,6 @@ export default function Footer() {
                   Blog
                 </Link>
               </li>
-              <li>
-                <Link href="/#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Features
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -61,8 +56,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/admin/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Admin Login
+                <Link href="/editorial" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Editorial Guidelines
                 </Link>
               </li>
             </ul>
@@ -79,11 +74,6 @@ export default function Footer() {
               <li>
                 <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/editorial" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Editorial Guidelines
                 </Link>
               </li>
             </ul>

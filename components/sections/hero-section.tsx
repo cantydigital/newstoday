@@ -5,7 +5,7 @@ import Link from "next/link"
 
 export default function HeroSection() {
   return (
-    <section className="py-20 md:py-32 bg-muted/30">
+    <section className="py-20 md:py-32 bg-muted/30 border-b border-border/40">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <Badge variant="secondary" className="mb-6">
