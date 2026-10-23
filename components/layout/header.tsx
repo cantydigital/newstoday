@@ -28,6 +28,9 @@ export default function Header({
             <Link href="/releases" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Press Releases
             </Link>
+            <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Blog
+            </Link>
             <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               About
             </Link>
