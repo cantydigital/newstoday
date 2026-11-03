@@ -18,6 +18,14 @@ import type { ContactSubmission } from "@/lib/contact-submissions"
 
 const MAX_CONTENT_LENGTH = 100_000
 
+// Normalize a custom publish date into an ISO string. Returns null for empty or
+// invalid input, so callers can fall back to a default.
+function normalizePublishedAt(value?: string): string | null {
+  if (!value) return null
+  const time = Date.parse(value)
+  return Number.isNaN(time) ? null : new Date(time).toISOString()
+}
+
 // Map a raw press_releases row to the PressRelease shape used by the UI.
 function toPressRelease(row: any): PressRelease {
   return {
@@ -230,20 +238,26 @@ export async function updatePressReleaseAction(
     throw new Error("Content is missing or exceeds the maximum allowed length")
   }
 
+  const updates: Record<string, unknown> = {
+    title: data.title,
+    subtitle: data.subtitle ?? null,
+    content: sanitizeHtml(data.content),
+    category: data.category,
+    author: data.author,
+    company: data.company,
+    contact_email: data.contactEmail,
+    contact_phone: data.contactPhone ?? null,
+    featured: data.featured || false,
+    image_url: validateImageUrl(data.imageUrl),
+  }
+
+  // Only override the publish date when the admin supplied a valid one.
+  const publishedAt = normalizePublishedAt(data.publishedAt)
+  if (publishedAt) updates.published_at = publishedAt
+
   const { error } = await supabase
     .from("press_releases")
-    .update({
-      title: data.title,
-      subtitle: data.subtitle ?? null,
-      content: sanitizeHtml(data.content),
-      category: data.category,
-      author: data.author,
-      company: data.company,
-      contact_email: data.contactEmail,
-      contact_phone: data.contactPhone ?? null,
-      featured: data.featured || false,
-      image_url: validateImageUrl(data.imageUrl),
-    })
+    .update(updates)
     .eq("id", id)
 
   if (error) throw new Error(`Failed to update press release: ${error.message}`)
@@ -288,7 +302,7 @@ export async function createPressReleaseAction(
       featured: data.featured || false,
       image_url: validateImageUrl(data.imageUrl),
       status: "published",
-      published_at: new Date().toISOString(),
+      published_at: normalizePublishedAt(data.publishedAt) ?? new Date().toISOString(),
     })
     .select("id")
     .single()

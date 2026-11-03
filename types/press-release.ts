@@ -33,4 +33,7 @@ export interface PressReleaseFormData {
   purchaseEmail?: string
   featured?: boolean
   imageUrl?: string
+  // Custom publish date as an ISO 8601 string. When omitted, the publish date
+  // defaults to now (on create) or is left unchanged (on update).
+  publishedAt?: string
 }

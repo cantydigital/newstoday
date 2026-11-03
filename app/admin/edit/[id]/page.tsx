@@ -47,6 +47,13 @@ const categories = [
   "Other",
 ]
 
+// Format a Date as a `datetime-local` input value (YYYY-MM-DDTHH:mm) in the
+// browser's local timezone.
+function toDateTimeLocal(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
 export default function EditPressReleasePage() {
   const params = useParams()
   const router = useRouter()
@@ -70,6 +77,7 @@ export default function EditPressReleasePage() {
     contactPhone: "",
     featured: false,
     imageUrl: "",
+    publishedAt: "",
   })
 
   useEffect(() => {
@@ -89,6 +97,7 @@ export default function EditPressReleasePage() {
             contactPhone: data.contactPhone || "",
             featured: data.featured || false,
             imageUrl: data.imageUrl || "",
+            publishedAt: data.publishedAt ? toDateTimeLocal(data.publishedAt) : "",
           })
         } else {
           setLoadError("Press release not found")
@@ -112,7 +121,14 @@ export default function EditPressReleasePage() {
     setIsLoading(true)
 
     try {
-      await updatePressReleaseAction(id, formData)
+      // Convert the datetime-local value (admin's local time) to ISO so the
+      // stored timestamp is timezone-correct regardless of the server's zone.
+      await updatePressReleaseAction(id, {
+        ...formData,
+        publishedAt: formData.publishedAt
+          ? new Date(formData.publishedAt).toISOString()
+          : undefined,
+      })
       setSuccess(true)
     } catch (err) {
       setError("Failed to update press release. Please try again.")
@@ -363,6 +379,21 @@ export default function EditPressReleasePage() {
                   disabled={isLoading}
                   label="Press Release Image"
                 />
+
+                <div className="space-y-2">
+                  <Label htmlFor="publishedAt">Publish Date</Label>
+                  <Input
+                    id="publishedAt"
+                    type="datetime-local"
+                    value={formData.publishedAt}
+                    onChange={(e) => handleChange("publishedAt", e.target.value)}
+                    disabled={isLoading}
+                    className="w-full sm:w-auto"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Controls the date shown on the release and its ordering in listings.
+                  </p>
+                </div>
 
                 <div className="flex items-center space-x-2">
                   <Checkbox

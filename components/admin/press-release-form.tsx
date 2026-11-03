@@ -54,6 +54,7 @@ export default function PressReleaseForm() {
     contactPhone: "",
     featured: false,
     imageUrl: "",
+    publishedAt: "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,7 +64,14 @@ export default function PressReleaseForm() {
     setIsLoading(true)
 
     try {
-      await createPressReleaseAction(formData)
+      // Convert the datetime-local value (admin's local time) to ISO so the
+      // stored timestamp is timezone-correct regardless of the server's zone.
+      await createPressReleaseAction({
+        ...formData,
+        publishedAt: formData.publishedAt
+          ? new Date(formData.publishedAt).toISOString()
+          : undefined,
+      })
       setSuccess(true)
       // Reset form
       setFormData({
@@ -77,6 +85,7 @@ export default function PressReleaseForm() {
         contactPhone: "",
         featured: false,
         imageUrl: "",
+        publishedAt: "",
       })
     } catch (err) {
       setError("Failed to publish press release. Please try again.")
@@ -219,6 +228,21 @@ export default function PressReleaseForm() {
             disabled={isLoading}
             label="Press Release Image"
           />
+
+          <div className="space-y-2">
+            <Label htmlFor="publishedAt">Publish Date</Label>
+            <Input
+              id="publishedAt"
+              type="datetime-local"
+              value={formData.publishedAt}
+              onChange={(e) => handleChange("publishedAt", e.target.value)}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank to use the current date and time.
+            </p>
+          </div>
 
           <div className="flex items-center space-x-2">
             <Checkbox
